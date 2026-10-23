@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NSS Textile | Online Store</title>
+<style>
+:root{--wine:#7b1738;--wine-dark:#4c1027;--gold:#d5a64a;--cream:#fff9f1;--ink:#2d2024;--muted:#756970;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:#fff;overflow-x:hidden;}
+a{color:inherit;text-decoration:none;}
+
+/* PAGE TRANSITION */
+.page-transition{position:fixed;inset:0;background:var(--wine-dark);z-index:9999;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
+.page-transition.active{transform:translateY(0);}
+
+/* EXPLOSION ENTRY ANIMATIONS */
+@keyframes fromTop{from{opacity:0;transform:translateY(-100px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fromBottom{from{opacity:0;transform:translateY(100px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-100px) scale(.85)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes fromRight{from{opacity:0;transform:translateX(100px) scale(.85)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.3) rotate(-10deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.from-top{animation:fromTop .7s cubic-bezier(.22,1,.36,1) both;}
+.from-bottom{animation:fromBottom .7s cubic-bezier(.22,1,.36,1) both;}
+.from-left{animation:fromLeft .7s cubic-bezier(.22,1,.36,1) both;}
+.from-right{animation:fromRight .7s cubic-bezier(.22,1,.36,1) both;}
+.pop-in{animation:popIn .6s cubic-bezier(.22,1,.36,1) both;}
+
+/* ANNOUNCEMENT */
+.announcement{background:linear-gradient(90deg,var(--wine-dark),#8b1a3a,var(--wine-dark));background-size:200%;animation:shimmer 3s linear infinite;color:#fff;text-align:center;padding:10px 12px;font-size:13px;letter-spacing:.5px;}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 6%;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:100;box-shadow:0 2px 12px #0001;transition:box-shadow .3s;}
+header.scrolled{box-shadow:0 4px 24px #4c102720;}
+.logo{font-family:Georgia,serif;font-size:28px;color:var(--wine);font-weight:bold;letter-spacing:.5px;position:relative;}
+.logo::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:2px;background:var(--gold);transition:width .4s;}
+.logo:hover::after{width:100%;}
+nav{display:flex;gap:22px;flex-wrap:wrap;color:#4b3d42;font-size:14px;}
+nav a{position:relative;padding-bottom:3px;}
+nav a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--wine);transition:width .3s;}
+nav a:hover::after{width:100%;}
+nav a:hover{color:var(--wine);}
+.cart-btn{border:1px solid var(--wine);color:var(--wine);border-radius:24px;padding:10px 18px;white-space:nowrap;font-weight:bold;transition:all .3s;position:relative;overflow:hidden;}
+.cart-btn::before{content:'';position:absolute;inset:0;background:var(--wine);transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:-1;}
+.cart-btn:hover{color:#fff;}
+.cart-btn:hover::before{transform:scaleX(1);}
+
+/* HERO */
+.hero{min-height:420px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;background:var(--cream);overflow:hidden;}
+.hero-copy{padding:55px 8% 55px 12%;animation:fadeSlideUp .9s ease both;}
+.eyebrow{color:var(--wine);text-transform:uppercase;letter-spacing:3px;font-size:12px;font-weight:bold;}
+h1{font:52px/1.1 Georgia,serif;color:var(--wine-dark);margin:14px 0;animation:fadeSlideUp .9s .15s ease both;}
+.hero p{color:var(--muted);line-height:1.8;max-width:440px;animation:fadeSlideUp .9s .3s ease both;}
+.btn{display:inline-block;margin-top:18px;padding:14px 26px;background:var(--wine);color:#fff;border-radius:6px;border:0;cursor:pointer;font-weight:bold;font-size:15px;transition:all .3s;position:relative;overflow:hidden;}
+.btn::after{content:'';position:absolute;inset:0;background:#fff2;transform:translateX(-100%);transition:transform .4s;}
+.btn:hover::after{transform:translateX(100%);}
+.btn:hover{background:var(--wine-dark);transform:translateY(-2px);box-shadow:0 8px 20px #7b173840;}
+.hero-image{height:420px;background:linear-gradient(0deg,rgba(50,10,25,.15),rgba(50,10,25,.02)),url('https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85') center 35%/cover;animation:zoomIn 1.2s ease both;}
+@keyframes zoomIn{from{transform:scale(1.08)}to{transform:scale(1)}}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* BENEFITS */
+.benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid #f0e9e6;}
+.benefit-item{padding:28px 6%;text-align:center;border-right:1px solid #f0e9e6;transition:background .3s;}
+.benefit-item:last-child{border-right:none;}
+.benefit-item:hover{background:var(--cream);}
+.benefit-icon{font-size:28px;margin-bottom:8px;display:block;}
+.benefit-item strong{display:block;color:var(--wine);margin-bottom:5px;font-size:15px;}
+.benefit-item span{color:var(--muted);font-size:13px;}
+
+/* SECTION */
+.section{padding:56px 6%;}
+h2{font:36px Georgia,serif;margin:0 0 8px;color:var(--wine-dark);}
+.section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:28px;}
+.section-heading p{margin:0;color:var(--muted);}
+
+/* FILTERS */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+.filter{background:#fff;border:1.5px solid #e7d8dc;color:var(--wine);padding:9px 18px;border-radius:24px;cursor:pointer;font-size:14px;transition:all .25s;font-weight:500;}
+.filter:hover,.filter.active{background:var(--wine);color:#fff;border-color:var(--wine);transform:translateY(-2px);box-shadow:0 4px 12px #7b173830;}
+
+/* COLOR FILTER */
+.color-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;}
+.color-filters span{font-size:13px;color:var(--muted);margin-right:4px;}
+.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .25s;position:relative;}
+.color-dot:hover,.color-dot.active{transform:scale(1.2);border-color:var(--wine-dark);box-shadow:0 2px 8px #0003;}
+.color-dot[title]::after{content:attr(title);position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:10px;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;}
+.color-dot:hover::after{opacity:1;}
+
+/* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;}
+.product{border:1px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;opacity:0;transform:translateY(40px);}
+.product.visible{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease,box-shadow .3s;}
+.product:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 16px 40px #4c102720;}
+.product-img-wrap{position:relative;overflow:hidden;}
+.product img{width:100%;height:260px;object-fit:cover;display:block;background:#f6eeee;transition:transform .5s;}
+.product:hover img{transform:scale(1.07);}
+.product-badge{position:absolute;top:12px;left:12px;background:var(--wine);color:#fff;font-size:10px;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;}
+.wishlist-btn{position:absolute;top:10px;right:10px;background:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0002;transition:all .25s;opacity:0;}
+.product:hover .wishlist-btn{opacity:1;}
+.wishlist-btn:hover{background:var(--wine);color:#fff;}
+.product-info{padding:16px;}
+.tag{color:var(--wine);font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+.product h3{font-size:15px;margin:7px 0 4px;font-weight:600;}
+.product-colors{display:flex;gap:5px;margin:8px 0;flex-wrap:wrap;}
+.swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;display:inline-block;}
+.swatch:hover,.swatch.active-swatch{border-color:var(--wine-dark);transform:scale(1.2);}
+.price{font-weight:bold;color:var(--wine-dark);font-size:16px;}
+.old-price{color:#9a8c91;text-decoration:line-through;font-weight:normal;font-size:13px;margin-left:6px;}
+.discount-pct{background:#e8f5e9;color:#2e7d32;font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:bold;}
+.product .btn{width:100%;margin-top:12px;padding:11px;font-size:14px;border-radius:6px;}
+
+/* NEWSLETTER */
+.newsletter{margin:0 6% 60px;padding:50px 20px;text-align:center;background:linear-gradient(135deg,var(--cream),#fce8f0);border-radius:16px;position:relative;overflow:hidden;}
+.newsletter::before{content:'✦';position:absolute;font-size:120px;color:#7b173808;top:-20px;left:5%;pointer-events:none;}
+.newsletter::after{content:'✦';position:absolute;font-size:80px;color:#7b173808;bottom:-10px;right:8%;pointer-events:none;}
+.newsletter h2{margin-bottom:10px;}
+.newsletter p{color:var(--muted);margin-bottom:20px;}
+.newsletter-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.newsletter input{width:min(300px,90%);padding:13px 16px;border:1.5px solid #dccbd0;border-radius:6px;font-size:14px;transition:border-color .3s;}
+.newsletter input:focus{outline:none;border-color:var(--wine);}
+
+/* FOOTER */
+footer{background:var(--wine-dark);color:#f9eaf0;padding:40px 6% 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;font-size:13px;}
+footer strong{display:block;margin-bottom:8px;font-size:15px;color:#fff;}
+footer p{color:#e1cbd3;line-height:1.8;}
+.footer-bottom{background:#3a0b1e;color:#c9a8b4;text-align:center;padding:12px 6%;font-size:12px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#24151b,#4c1027);color:#fff;padding:14px 20px;border-radius:10px;display:none;box-shadow:0 8px 30px #0004;z-index:9998;animation:toastIn .3s ease;max-width:280px;font-size:14px;}
+.toast.show{display:flex;align-items:center;gap:10px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity .7s ease,transform .7s ease;}
+.reveal-left.visible{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(50px);transition:opacity .7s ease,transform .7s ease;}
+.reveal-right.visible{opacity:1;transform:translateX(0);}
+
+/* FLOATING PETALS */
+.petal{position:fixed;pointer-events:none;font-size:18px;animation:fall linear infinite;opacity:.6;z-index:1;}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:.7}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}
+
+@media(max-width:900px){
+  header{padding:16px 4%;flex-wrap:wrap;}
+  nav{order:3;width:100%;justify-content:center;gap:15px;}
+  h1{font-size:38px;}
+  .products{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .product img{height:220px;}
+  .benefits{grid-template-columns:1fr;}
+  .benefit-item{border-right:none;border-bottom:1px solid #f0e9e6;}
+}
+@media(max-width:560px){
+  .hero{grid-template-columns:1fr;}
+  h1{font-size:32px;}
+  .hero-image{height:240px;}
+  .section{padding:36px 4%;}
+  .products{gap:12px;}
+  .product img{height:180px;}
+  .logo{font-size:22px;}
+}
+</style>
+</head>
+<body>
+<div class="page-transition" id="pt"></div>
+
+<div class="announcement">✨ Festive Special — Free Shipping on orders above ₹999 | New arrivals every week ✨</div>
+
+<header id="header">
+  <a class="logo" href="#">NSS Textile</a>
+  <nav aria-label="Main navigation">
+    <a href="#">Home</a>
+    <a href="#shop">Shop</a>
+    <a href="#shop" onclick="setCategory('Silk')">Silk</a>
+    <a href="#shop" onclick="setCategory('Cotton')">Cotton</a>
+    <a href="#shop" onclick="setCategory('Bridal')">Bridal</a>
+    <a href="add_saree.html" onclick="navigate(event,'add_saree.html')">Admin</a>
+    <a href="sales.html" onclick="navigate(event,'sales.html')">Sales</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <a class="cart-btn" href="cart.html" onclick="navigate(event,'cart.html')">🛒 Cart (<span id="cart-count">0</span>)</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow from-left" style="animation-delay:.1s">Tradition, woven beautifully</div>
+      <h1 class="from-left" style="animation-delay:.2s">Every saree tells a story.</h1>
+      <p class="from-left" style="animation-delay:.3s">Explore timeless weaves, graceful prints, and beautiful colours — curated for your everyday moments and grand celebrations.</p>
+      <a class="btn from-bottom" style="animation-delay:.4s" href="#shop">Explore Collection ↓</a>
+    </div>
+    <div class="hero-image from-right" style="animation-delay:.15s" role="img" aria-label="Traditional Indian saree collection"></div>
+  </section>
+
+  <section class="benefits reveal">
+    <div class="benefit-item from-left" style="animation-delay:.1s"><span class="benefit-icon">🌟</span><strong>Premium Quality</strong><span>Handpicked weaves for every occasion</span></div>
+    <div class="benefit-item pop-in" style="animation-delay:.2s"><span class="benefit-icon">🔒</span><strong>Secure Shopping</strong><span>Safe & simple checkout experience</span></div>
+    <div class="benefit-item from-right" style="animation-delay:.3s"><span class="benefit-icon">💬</span><strong>Customer Support</strong><span>Always here to help you</span></div>
+  </section>
+
+  <section class="section" id="shop">
+    <div class="section-heading reveal">
+      <div><h2>Shop Our Sarees</h2><p>Find your next favourite drape.</p></div>
+    </div>
+    <div class="filters reveal" id="cat-filters">
+      <button class="filter active" onclick="setCategory('All')">All Sarees</button>
+      <button class="filter" onclick="setCategory('Silk')">Silk</button>
+      <button class="filter" onclick="setCategory('Cotton')">Cotton</button>
+      <button class="filter" onclick="setCategory('Designer')">Designer</button>
+      <button class="filter" onclick="setCategory('Bridal')">Bridal</button>
+      <button class="filter" onclick="setCategory('Casual')">Casual</button>
+    </div>
+    <div class="color-filters reveal" id="color-filters">
+      <span>Filter by colour:</span>
+    </div>
+    <div class="products" id="products"></div>
+  </section>
+
+  <section class="newsletter reveal" id="contact">
+    <h2>Stay in the loop 💌</h2>
+    <p>Sign up to hear about new arrivals and exclusive collections.</p>
+    <div class="newsletter-form">
+      <input type="email" id="email" placeholder="Enter your email address" />
+      <button class="btn" onclick="subscribe()">Subscribe</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="reveal-left"><strong>NSS Textile</strong><p>Beautiful sarees for every occasion.<br/>Tradition meets elegance.</p></div>
+  <div class="reveal"><strong>Customer Care</strong><p>Email: hello@nsstextile.example<br/>Phone: +91 00000 00000</p></div>
+  <div class="reveal"><strong>Quick Links</strong><p><a href="#shop">Shop Sarees</a><br/><a href="cart.html">View Cart</a><br/><a href="#contact">Contact</a></p></div>
+  <div class="reveal-right"><strong>Information</strong><p>Shipping · Returns<br/>Privacy Policy</p></div>
+</footer>
+<div class="footer-bottom">© <span id="year"></span> NSS Textile. All rights reserved.</div>
+
+<div class="toast" id="toast"><span id="toast-icon">✅</span><span id="toast-msg"></span></div>
+
+<script>
+const COLOR_MAP = {
+  "Red":       "#e53935",
+  "Maroon":    "#7b1738",
+  "Pink":      "#f48fb1",
+  "Rose":      "#e91e8c",
+  "Orange":    "#fb8c00",
+  "Yellow":    "#fdd835",
+  "Green":     "#43a047",
+  "Teal":      "#00897b",
+  "Blue":      "#1e88e5",
+  "Navy":      "#1a237e",
+  "Purple":    "#8e24aa",
+  "Lavender":  "#ce93d8",
+  "Gold":      "#d5a64a",
+  "Cream":     "#fff9f1",
+  "White":     "#f5f5f5",
+  "Black":     "#212121",
+  "Grey":      "#9e9e9e",
+  "Brown":     "#6d4c41",
+  "Peach":     "#ffccbc",
+  "Magenta":   "#d81b60"
+};
+
+const defaultSarees = [
+  { id:1, name:"Classic Kanjivaram Silk", category:"Silk", price:4299, oldPrice:5299, tag:"Bestseller", colors:["Red","Gold","Maroon"], image:"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=700&q=80" },
+  { id:2, name:"Floral Cotton Saree", category:"Cotton", price:1299, oldPrice:1599, tag:"Everyday favourite", colors:["Blue","Green","Pink"], image:"https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80" },
+  { id:3, name:"Festive Designer Saree", category:"Designer", price:2499, oldPrice:2999, tag:"New arrival", colors:["Purple","Gold","Black"], image:"https://images.unsplash.com/photo-1583391733956-6c78276477e8?auto=format&fit=crop&w=700&q=80" },
+  { id:4, name:"Soft Silk Celebration Saree", category:"Silk", price:3499, oldPrice:3999, tag:"Festive edit", colors:["Maroon","Pink","Orange"], image:"https://images.unsplash.com/photo-1610189012906-4c9b9d0f8d4d?auto=format&fit=crop&w=700&q=80" }
+];
+
+function getSarees(){ const s=localStorage.getItem("nss_sarees"); return s?JSON.parse(s):defaultSarees; }
+let cart = JSON.parse(localStorage.getItem("nss_cart")||"[]");
+let currentCategory = "All";
+let currentColor = "All";
+
+function updateCartCount(){ document.getElementById("cart-count").textContent = cart.reduce((s,i)=>s+i.qty,0); }
+
+function buildColorFilters(){
+  const sarees = getSarees();
+  const allColors = new Set();
+  sarees.forEach(s=>(s.colors||[]).forEach(c=>allColors.add(c)));
+  const wrap = document.getElementById("color-filters");
+  wrap.innerHTML = '<span>Filter by colour:</span>';
+  const allDot = document.createElement("div");
+  allDot.className = "color-dot active";
+  allDot.style.background = "linear-gradient(135deg,#e53935,#1e88e5,#43a047,#fdd835)";
+  allDot.title = "All";
+  allDot.onclick = ()=>{ currentColor="All"; document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active")); allDot.classList.add("active"); renderProducts(); };
+  wrap.appendChild(allDot);
+  allColors.forEach(c=>{
+    const dot = document.createElement("div");
+    dot.className = "color-dot";
+    dot.style.background = COLOR_MAP[c]||"#ccc";
+    dot.title = c;
+    dot.onclick = ()=>{ currentColor=c; document.querySelectorAll(".color-dot").forEach(d=>d.classList.remove("active")); dot.classList.add("active"); renderProducts(); };
+    wrap.appendChild(dot);
+  });
+}
+
+function renderProducts(){
+  const sarees = getSarees();
+  let list = currentCategory==="All" ? sarees : sarees.filter(s=>s.category===currentCategory);
+  if(currentColor!=="All") list = list.filter(s=>(s.colors||[]).includes(currentColor));
+  const grid = document.getElementById("products");
+  grid.innerHTML = list.map(s=>{
+    const disc = s.oldPrice>s.price ? Math.round((1-s.price/s.oldPrice)*100) : 0;
+    const swatches = (s.colors||[]).map(c=>`<span class="swatch" style="background:${COLOR_MAP[c]||'#ccc'}" title="${c}" onclick="filterByColor('${c}')"></span>`).join("");
+    return `<article class="product">
+      <div class="product-img-wrap">
+        <img src="${s.image}" alt="${s.name}" loading="lazy" onerror="this.style.background='#f6eeee'">
+        <div class="product-badge">${s.tag}</div>
+        <button class="wishlist-btn" title="Wishlist">♡</button>
+      </div>
+      <div class="product-info">
+        <div class="tag">${s.category}</div>
+        <h3>${s.name}</h3>
+        <div class="product-colors">${swatches}</div>
+        <div class="price">₹${Number(s.price).toLocaleString("en-IN")}
+          ${s.oldPrice>s.price?`<span class="old-price">₹${Number(s.oldPrice).toLocaleString("en-IN")}</span><span class="discount-pct">${disc}% off</span>`:""}
+        </div>
+        <button class="btn" onclick="addToCart(${s.id},'${s.name.replace(/'/g,"\\'")}',${s.price},'${s.image}')">Add to Cart 🛒</button>
+      </div>
+    </article>`;
+  }).join("");
+  document.querySelectorAll(".filter").forEach(btn=>{
+    btn.classList.toggle("active", btn.textContent.trim()===currentCategory||(currentCategory==="All"&&btn.textContent.includes("All")));
+  });
+  observeProducts();
+}
+
+function filterByColor(c){ currentColor=c; document.querySelectorAll(".color-dot").forEach(d=>{ d.classList.toggle("active",d.title===c); }); renderProducts(); }
+
+function setCategory(cat){ currentCategory=cat; renderProducts(); }
+
+function addToCart(id,name,price,image){
+  const ex = cart.find(i=>i.id===id);
+  if(ex) ex.qty++; else cart.push({id,name,price,image,qty:1});
+  localStorage.setItem("nss_cart",JSON.stringify(cart));
+  updateCartCount();
+  showToast("✅","<b>"+name+"</b> added to cart!");
+}
+
+function showToast(icon,msg){
+  const t=document.getElementById("toast");
+  document.getElementById("toast-icon").textContent=icon;
+  document.getElementById("toast-msg").innerHTML=msg;
+  t.classList.add("show");
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+function subscribe(){
+  const v=document.getElementById("email").value;
+  if(!v||!v.includes("@")){ showToast("⚠️","Please enter a valid email."); return; }
+  showToast("💌","Thanks for subscribing!");
+  document.getElementById("email").value="";
+}
+
+function navigate(e,url){ e.preventDefault(); const pt=document.getElementById("pt"); pt.classList.add("active"); setTimeout(()=>window.location.href=url,450); }
+
+// Scroll reveal
+function observeProducts(){
+  document.querySelectorAll(".product").forEach((el,i)=>{
+    el.style.transitionDelay=(i%4)*0.08+"s";
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("visible"); obs.unobserve(en.target); }});
+    },{threshold:0.1});
+    obs.observe(el);
+  });
+}
+
+function initReveal(){
+  document.querySelectorAll(".reveal,.reveal-left,.reveal-right").forEach(el=>{
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("visible"); obs.unobserve(en.target); }});
+    },{threshold:0.12});
+    obs.observe(el);
+  });
+}
+
+// Sticky header shadow
+window.addEventListener("scroll",()=>{
+  document.getElementById("header").classList.toggle("scrolled",window.scrollY>60);
+});
+
+// Floating petals
+function spawnPetals(){
+  const emojis=["🌸","✨","🌺","💫","🌼"];
+  for(let i=0;i<8;i++){
+    const p=document.createElement("div");
+    p.className="petal";
+    p.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left=Math.random()*100+"vw";
+    p.style.animationDuration=(6+Math.random()*8)+"s";
+    p.style.animationDelay=(Math.random()*10)+"s";
+    p.style.fontSize=(12+Math.random()*14)+"px";
+    document.body.appendChild(p);
+  }
+}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+updateCartCount();
+buildColorFilters();
+renderProducts();
+initReveal();
+spawnPetals();
+
+// Page entry animation
+window.addEventListener("load",()=>{ const pt=document.getElementById("pt"); pt.style.transform="translateY(100%)"; setTimeout(()=>pt.style.display="none",600); });
+</script>
+</body>
+</html>

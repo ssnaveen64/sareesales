@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin | NSS Textile</title>
+<style>
+:root{--wine:#7b1738;--wine-dark:#4c1027;--cream:#fff9f1;--ink:#2d2024;--muted:#756970;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:#f4eef1;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+
+.page-transition{position:fixed;inset:0;background:var(--wine-dark);z-index:9999;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
+.page-transition.active{transform:translateY(0);}
+
+/* EXPLOSION ENTRY ANIMATIONS */
+@keyframes fromTop{from{opacity:0;transform:translateY(-120px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fromBottom{from{opacity:0;transform:translateY(120px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-120px) scale(.8)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes fromRight{from{opacity:0;transform:translateX(120px) scale(.8)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes popIn{from{opacity:0;transform:scale(.4) rotate(-8deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
+.from-top{animation:fromTop .7s cubic-bezier(.22,1,.36,1) both;}
+.from-bottom{animation:fromBottom .7s cubic-bezier(.22,1,.36,1) both;}
+.from-left{animation:fromLeft .7s cubic-bezier(.22,1,.36,1) both;}
+.from-right{animation:fromRight .7s cubic-bezier(.22,1,.36,1) both;}
+.pop-in{animation:popIn .6s cubic-bezier(.22,1,.36,1) both;}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 5%;background:linear-gradient(135deg,var(--wine-dark),#8b1a3a);color:#fff;box-shadow:0 4px 20px #4c102740;}
+.logo{font-family:Georgia,serif;font-size:24px;font-weight:bold;color:#fff;}
+.admin-badge{background:#fff;color:var(--wine);font-size:11px;padding:3px 10px;border-radius:12px;margin-left:8px;font-weight:bold;vertical-align:middle;}
+nav a{color:#f9eaf0;font-size:14px;margin-left:18px;transition:color .2s;}
+nav a:hover{color:#fff;}
+
+.page{display:grid;grid-template-columns:400px 1fr;gap:28px;padding:32px 5%;max-width:1300px;margin:0 auto;}
+
+/* FORM CARD */
+.card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 4px 20px #4c102712;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card-title{font:22px Georgia,serif;color:var(--wine-dark);margin-bottom:22px;display:flex;align-items:center;gap:10px;}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 5px;text-transform:uppercase;letter-spacing:.6px;}
+input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid #e0d0d5;border-radius:8px;font-size:14px;color:var(--ink);background:#fff;transition:border-color .25s,box-shadow .25s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--wine);box-shadow:0 0 0 3px #7b173818;}
+textarea{resize:vertical;min-height:70px;}
+input[type=number]{-moz-appearance:textfield;}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.preview-img{width:100%;height:170px;object-fit:cover;border-radius:8px;margin-top:10px;display:none;border:2px solid #f0e9e6;}
+
+/* UPLOAD AREA */
+.upload-area{border:2px dashed #e0d0d5;border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .25s;margin-top:8px;background:#fdf8fa;}
+.upload-area:hover{border-color:var(--wine);background:#fdf0f4;}
+.upload-area input[type=file]{display:none;}
+.upload-area .upload-icon{font-size:28px;margin-bottom:6px;}
+.upload-area p{font-size:12px;color:var(--muted);margin:0;}
+.upload-area strong{color:var(--wine);font-size:13px;}
+.upload-tabs{display:flex;gap:0;margin-top:8px;border:1.5px solid #e0d0d5;border-radius:8px;overflow:hidden;}
+.upload-tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);transition:all .2s;border:none;}
+.upload-tab.active{background:var(--wine);color:#fff;}
+.tab-panel{display:none;margin-top:8px;}
+.tab-panel.active{display:block;}
+
+/* ADD CATEGORY ROW */
+.add-cat-row{display:flex;gap:6px;margin-top:6px;}
+.add-cat-row input{flex:1;margin:0;}
+.add-cat-btn{padding:0 14px;background:var(--wine);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;transition:background .2s;white-space:nowrap;}
+.add-cat-btn:hover{background:var(--wine-dark);}
+
+/* COLOR CHECKBOXES */
+.color-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.color-check{display:flex;align-items:center;gap:5px;cursor:pointer;padding:4px 8px;border-radius:20px;border:1.5px solid #e0d0d5;transition:all .2s;font-size:12px;}
+.color-check:hover{border-color:var(--wine);}
+.color-check.selected{border-color:var(--wine);background:#fdf0f4;}
+.color-swatch-sm{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid #0002;}
+
+.btn{display:inline-block;padding:12px 20px;background:var(--wine);color:#fff;border-radius:8px;border:0;cursor:pointer;font-weight:bold;font-size:14px;transition:all .3s;width:100%;margin-top:14px;text-align:center;}
+.btn:hover{background:var(--wine-dark);transform:translateY(-1px);box-shadow:0 6px 18px #7b173830;}
+.btn-outline{background:#fff;color:var(--wine);border:1.5px solid var(--wine);margin-top:8px;}
+.btn-outline:hover{background:var(--cream);}
+.btn-gold{background:linear-gradient(135deg,#d5a64a,#b8860b);margin-top:8px;}
+.btn-gold:hover{background:linear-gradient(135deg,#b8860b,#d5a64a);}
+
+/* COLLECTION */
+.collection-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.collection-header h3{font:22px Georgia,serif;color:var(--wine-dark);}
+.search-box{padding:9px 14px;border:1.5px solid #e0d0d5;border-radius:24px;font-size:13px;width:200px;transition:border-color .25s;}
+.search-box:focus{outline:none;border-color:var(--wine);}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
+
+/* SAREE CARD */
+.saree-card{border:1.5px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;animation:fadeUp .4s ease both;}
+.saree-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px #4c102718;}
+.saree-card img{width:100%;height:150px;object-fit:cover;display:block;background:#f6eeee;}
+.saree-card-info{padding:12px;}
+.cat-tag{display:inline-block;background:#f5e8ec;color:var(--wine);font-size:10px;padding:3px 8px;border-radius:10px;margin-bottom:6px;font-weight:bold;}
+.saree-card-info strong{font-size:13px;display:block;margin-bottom:4px;line-height:1.4;}
+.saree-card-info .price{font-weight:bold;color:var(--wine-dark);font-size:13px;}
+.card-colors{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap;}
+.card-color-dot{width:14px;height:14px;border-radius:50%;border:1px solid #0002;display:inline-block;}
+.card-actions{display:flex;gap:6px;margin-top:10px;}
+.edit-btn{flex:1;padding:7px;background:linear-gradient(135deg,#d5a64a,#b8860b);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;transition:all .2s;}
+.edit-btn:hover{transform:scale(1.03);}
+.del-btn{flex:1;padding:7px;background:#fff;color:#c0a0a8;border:1px solid #e0d0d5;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s;}
+.del-btn:hover{background:#fdf0f4;color:var(--wine);border-color:var(--wine);}
+
+/* EDIT MODAL */
+.modal-overlay{position:fixed;inset:0;background:#0008;z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:16px;padding:32px;width:min(560px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px #0006;animation:explodeIn .5s cubic-bezier(.22,1,.36,1);}
+@keyframes explodeIn{from{opacity:0;transform:scale(.5) rotate(-6deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
+.modal-title{font:22px Georgia,serif;color:var(--wine-dark);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);transition:color .2s;}
+.modal-close:hover{color:var(--wine);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#24151b,#4c1027);color:#fff;padding:14px 20px;border-radius:10px;display:none;box-shadow:0 8px 30px #0004;z-index:9998;font-size:14px;gap:10px;}
+.toast.show{display:flex;align-items:center;}
+
+footer{background:var(--wine-dark);color:#f9eaf0;padding:18px 5%;text-align:center;font-size:13px;margin-top:40px;}
+
+@media(max-width:900px){.page{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page-transition" id="pt"></div>
+
+<header>
+  <div>
+    <a class="logo" href="saree_store.html" onclick="navigate(event,'saree_store.html')">NSS Textile</a>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <nav>
+    <a href="sales.html" onclick="navigate(event,'sales.html')">📊 Sales</a>
+    <a href="saree_store.html" onclick="navigate(event,'saree_store.html')">← Store</a>
+    <a href="cart.html" onclick="navigate(event,'cart.html')">Cart</a>
+  </nav>
+</header>
+
+<div class="page">
+  <!-- ADD FORM -->
+  <div class="card from-left" style="animation-delay:.05s">
+    <div class="card-title">➕ <span id="form-title">Add New Saree</span></div>
+    <form id="saree-form" onsubmit="submitForm(event)">
+      <input type="hidden" id="edit-id" value=""/>
+      <label>Saree Name *</label>
+      <input type="text" id="s-name" placeholder="e.g. Banarasi Silk Saree" required/>
+      <label>Category *</label>
+      <select id="s-category" required></select>
+      <div class="add-cat-row">
+        <input type="text" id="s-new-cat" placeholder="Add new category..."/>
+        <button type="button" class="add-cat-btn" onclick="addCategory('s-category','s-new-cat')">+</button>
+      </div>
+      <label>Tag / Label</label>
+      <input type="text" id="s-tag" placeholder="e.g. New arrival, Bestseller"/>
+      <label>Price (₹) *</label>
+      <input type="number" id="s-price" placeholder="e.g. 2499" min="1" inputmode="numeric" onwheel="this.blur()" required/>
+      <label>Original / MRP Price (₹)</label>
+      <input type="number" id="s-old-price" placeholder="e.g. 2999" min="1" inputmode="numeric" onwheel="this.blur()"/>
+      <label>Saree Photo</label>
+      <div class="upload-tabs">
+        <button type="button" class="upload-tab active" onclick="switchTab('s','url')">🔗 URL</button>
+        <button type="button" class="upload-tab" onclick="switchTab('s','file')">📁 Upload from Device</button>
+      </div>
+      <div class="tab-panel active" id="s-tab-url">
+        <input type="url" id="s-image" placeholder="https://..." oninput="previewImg('s',this.value)"/>
+      </div>
+      <div class="tab-panel" id="s-tab-file">
+        <div class="upload-area" onclick="document.getElementById('s-file-input').click()">
+          <div class="upload-icon">📂</div>
+          <strong>Click to choose photo</strong>
+          <p>JPG, PNG, WEBP supported</p>
+          <input type="file" id="s-file-input" accept="image/*" onchange="handleFileUpload('s',this)"/>
+        </div>
+      </div>
+      <img id="s-img-preview" class="preview-img" alt="Preview"/>
+      <label>Available Colours</label>
+      <div class="color-grid" id="color-grid"></div>
+      <label>Description (optional)</label>
+      <textarea id="s-desc" placeholder="Short description..."></textarea>
+      <button class="btn" type="submit" id="submit-btn">✅ Add to Collection</button>
+      <button class="btn btn-outline" type="button" onclick="resetForm()">Clear Form</button>
+    </form>
+  </div>
+
+  <!-- COLLECTION -->
+  <div class="card from-right" style="animation-delay:.1s">
+    <div class="collection-header">
+      <h3>Collection (<span id="saree-count">0</span>)</h3>
+      <input class="search-box" type="text" placeholder="🔍 Search sarees..." oninput="renderCollection(this.value)"/>
+    </div>
+    <div class="collection-grid" id="collection-grid"></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Saree <button class="modal-close" onclick="closeModal()">✕</button></div>
+    <form onsubmit="saveEdit(event)">
+      <input type="hidden" id="m-id"/>
+      <label>Saree Name *</label>
+      <input type="text" id="m-name" required/>
+      <label>Category *</label>
+      <select id="m-category" required></select>
+      <div class="add-cat-row">
+        <input type="text" id="m-new-cat" placeholder="Add new category..."/>
+        <button type="button" class="add-cat-btn" onclick="addCategory('m-category','m-new-cat')">+</button>
+      </div>
+      <label>Tag / Label</label>
+      <input type="text" id="m-tag"/>
+      <label>Price (₹) *</label>
+      <input type="number" id="m-price" min="1" inputmode="numeric" onwheel="this.blur()" required/>
+      <label>Original / MRP Price (₹)</label>
+      <input type="number" id="m-old-price" min="1" inputmode="numeric" onwheel="this.blur()"/>
+      <label>Saree Photo</label>
+      <div class="upload-tabs">
+        <button type="button" class="upload-tab active" id="m-tab-url-btn" onclick="switchTab('m','url')">🔗 URL</button>
+        <button type="button" class="upload-tab" id="m-tab-file-btn" onclick="switchTab('m','file')">📁 Upload from Device</button>
+      </div>
+      <div class="tab-panel active" id="m-tab-url">
+        <input type="url" id="m-image" placeholder="https://..." oninput="previewImg('m',this.value)"/>
+      </div>
+      <div class="tab-panel" id="m-tab-file">
+        <div class="upload-area" onclick="document.getElementById('m-file-input').click()">
+          <div class="upload-icon">📂</div>
+          <strong>Click to choose photo</strong>
+          <p>JPG, PNG, WEBP supported</p>
+          <input type="file" id="m-file-input" accept="image/*" onchange="handleFileUpload('m',this)"/>
+        </div>
+      </div>
+      <img id="m-img-preview" class="preview-img" alt="Preview"/>
+      <label>Available Colours</label>
+      <div class="color-grid" id="m-color-grid"></div>
+      <label>Description</label>
+      <textarea id="m-desc"></textarea>
+      <button class="btn" type="submit">💾 Save Changes</button>
+      <button class="btn btn-outline" type="button" onclick="closeModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<footer>© <span id="year"></span> NSS Textile Admin Panel.</footer>
+<div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
+
+<script>
+const COLOR_MAP={
+  "Red":"#e53935","Maroon":"#7b1738","Pink":"#f48fb1","Rose":"#e91e8c",
+  "Orange":"#fb8c00","Yellow":"#fdd835","Green":"#43a047","Teal":"#00897b",
+  "Blue":"#1e88e5","Navy":"#1a237e","Purple":"#8e24aa","Lavender":"#ce93d8",
+  "Gold":"#d5a64a","Cream":"#fff9f1","White":"#f5f5f5","Black":"#212121",
+  "Grey":"#9e9e9e","Brown":"#6d4c41","Peach":"#ffccbc","Magenta":"#d81b60"
+};
+const ALL_COLORS=Object.keys(COLOR_MAP);
+
+const defaultSarees=[
+  {id:1,name:"Classic Kanjivaram Silk",category:"Silk",price:4299,oldPrice:5299,tag:"Bestseller",colors:["Red","Gold","Maroon"],image:"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=700&q=80"},
+  {id:2,name:"Floral Cotton Saree",category:"Cotton",price:1299,oldPrice:1599,tag:"Everyday favourite",colors:["Blue","Green","Pink"],image:"https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80"},
+  {id:3,name:"Festive Designer Saree",category:"Designer",price:2499,oldPrice:2999,tag:"New arrival",colors:["Purple","Gold","Black"],image:"https://images.unsplash.com/photo-1583391733956-6c78276477e8?auto=format&fit=crop&w=700&q=80"},
+  {id:4,name:"Soft Silk Celebration Saree",category:"Silk",price:3499,oldPrice:3999,tag:"Festive edit",colors:["Maroon","Pink","Orange"],image:"https://images.unsplash.com/photo-1610189012906-4c9b9d0f8d4d?auto=format&fit=crop&w=700&q=80"}
+];
+
+// ---- CATEGORIES ----
+const BASE_CATS=["Silk","Cotton","Designer","Bridal","Casual"];
+function getCategories(){
+  const s=localStorage.getItem("nss_cats");
+  return s?JSON.parse(s):[...BASE_CATS];
+}
+function saveCategories(arr){localStorage.setItem("nss_cats",JSON.stringify(arr));}
+
+function populateCategorySelect(selId,selected=""){
+  const sel=document.getElementById(selId);
+  const cats=getCategories();
+  sel.innerHTML=`<option value="">Select category</option>`+cats.map(c=>`<option value="${c}"${c===selected?" selected":""}>${c}</option>`).join("");
+}
+
+function addCategory(selId,inputId){
+  const inp=document.getElementById(inputId);
+  const val=inp.value.trim();
+  if(!val){showToast("⚠️","Enter a category name.");return;}
+  const cats=getCategories();
+  if(cats.map(c=>c.toLowerCase()).includes(val.toLowerCase())){showToast("⚠️","Category already exists.");return;}
+  cats.push(val);
+  saveCategories(cats);
+  populateCategorySelect(selId,val);
+  populateCategorySelect(selId===" s-category"?"m-category":"s-category");
+  inp.value="";
+  showToast("✅",`Category "${val}" added!`);
+}
+
+// ---- SAREES ----
+function getSarees(){const s=localStorage.getItem("nss_sarees");return s?JSON.parse(s):defaultSarees;}
+function saveSarees(arr){localStorage.setItem("nss_sarees",JSON.stringify(arr));}
+
+// ---- COLOR GRID ----
+function buildColorGrid(containerId,selected=[]){
+  const wrap=document.getElementById(containerId);
+  wrap.innerHTML="";
+  ALL_COLORS.forEach(c=>{
+    const div=document.createElement("div");
+    div.className="color-check"+(selected.includes(c)?" selected":"");
+    div.dataset.color=c;
+    div.innerHTML=`<span class="color-swatch-sm" style="background:${COLOR_MAP[c]}"></span>${c}`;
+    div.onclick=()=>div.classList.toggle("selected");
+    wrap.appendChild(div);
+  });
+}
+function getSelectedColors(containerId){
+  return [...document.querySelectorAll(`#${containerId} .color-check.selected`)].map(d=>d.dataset.color);
+}
+
+// ---- UPLOAD TABS ----
+function switchTab(prefix,tab){
+  document.getElementById(prefix+"-tab-url").classList.toggle("active",tab==="url");
+  document.getElementById(prefix+"-tab-file").classList.toggle("active",tab==="file");
+  document.querySelectorAll(`#${prefix=="s"?"saree-form":"modal"} .upload-tab`).forEach((b,i)=>{
+    b.classList.toggle("active",(tab==="url"&&i===0)||(tab==="file"&&i===1));
+  });
+}
+
+function handleFileUpload(prefix,input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById(prefix+"-img-preview");
+    img.src=e.target.result;
+    img.style.display="block";
+    if(prefix==="s") window._sFileData=e.target.result;
+    else window._mFileData=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewImg(prefix,url){
+  const img=document.getElementById(prefix+"-img-preview");
+  img.src=url; img.style.display=url?"block":"none";
+  if(prefix==="s") window._sFileData=null;
+  else window._mFileData=null;
+}
+
+function getImageValue(prefix){
+  const fileData=prefix==="s"?window._sFileData:window._mFileData;
+  if(fileData) return fileData;
+  return document.getElementById(prefix==="s"?"s-image":"m-image").value.trim();
+}
+
+// ---- RENDER COLLECTION ----
+function renderCollection(search=""){
+  const sarees=getSarees();
+  const q=search.toLowerCase();
+  const filtered=q?sarees.filter(s=>s.name.toLowerCase().includes(q)||s.category.toLowerCase().includes(q)):sarees;
+  document.getElementById("saree-count").textContent=sarees.length;
+  const grid=document.getElementById("collection-grid");
+  if(!filtered.length){grid.innerHTML=`<p style="color:var(--muted);padding:20px">No sarees found.</p>`;return;}
+  grid.innerHTML=filtered.map((s,i)=>{
+    const dots=(s.colors||[]).map(c=>`<span class="card-color-dot" style="background:${COLOR_MAP[c]||'#ccc'}" title="${c}"></span>`).join("");
+    return `<div class="saree-card" style="animation:fromBottom .5s ${i*0.06}s cubic-bezier(.22,1,.36,1) both">
+      <img src="${s.image}" alt="${s.name}" onerror="this.style.background='#f6eeee'">
+      <div class="saree-card-info">
+        <span class="cat-tag">${s.category}</span>
+        <strong>${s.name}</strong>
+        <div class="card-colors">${dots}</div>
+        <div class="price">₹${Number(s.price).toLocaleString("en-IN")}
+          ${s.oldPrice>s.price?`<span style="color:#9a8c91;text-decoration:line-through;font-size:11px;margin-left:4px">₹${Number(s.oldPrice).toLocaleString("en-IN")}</span>`:""}
+        </div>
+        <div class="card-actions">
+          <button class="edit-btn" onclick="openEdit(${s.id})">✏️ Edit</button>
+          <button class="del-btn" onclick="deleteSaree(${s.id})">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ---- SUBMIT ADD FORM ----
+function submitForm(e){
+  e.preventDefault();
+  const imgVal=getImageValue("s");
+  if(!imgVal){showToast("⚠️","Please provide a photo (URL or upload).");return;}
+  const sarees=getSarees();
+  const newId=sarees.length?Math.max(...sarees.map(s=>s.id))+1:1;
+  sarees.push({
+    id:newId,
+    name:document.getElementById("s-name").value.trim(),
+    category:document.getElementById("s-category").value,
+    tag:document.getElementById("s-tag").value.trim()||"New",
+    price:Number(document.getElementById("s-price").value),
+    oldPrice:Number(document.getElementById("s-old-price").value)||Number(document.getElementById("s-price").value),
+    image:imgVal,
+    colors:getSelectedColors("color-grid"),
+    description:document.getElementById("s-desc").value.trim()
+  });
+  saveSarees(sarees);
+  renderCollection();
+  showToast("✅","Saree added to collection!");
+  resetForm();
+}
+
+function resetForm(){
+  document.getElementById("saree-form").reset();
+  document.getElementById("s-img-preview").style.display="none";
+  document.getElementById("edit-id").value="";
+  document.getElementById("form-title").textContent="Add New Saree";
+  document.getElementById("submit-btn").textContent="✅ Add to Collection";
+  buildColorGrid("color-grid",[]);
+  window._sFileData=null;
+  switchTab("s","url");
+}
+
+// ---- OPEN EDIT MODAL ----
+function openEdit(id){
+  const sarees=getSarees();
+  const s=sarees.find(x=>x.id===id);
+  if(!s)return;
+  window._mFileData=null;
+  document.getElementById("m-id").value=s.id;
+  document.getElementById("m-name").value=s.name;
+  document.getElementById("m-tag").value=s.tag||"";
+  document.getElementById("m-price").value=s.price;
+  document.getElementById("m-old-price").value=s.oldPrice||"";
+  document.getElementById("m-image").value=s.image;
+  document.getElementById("m-desc").value=s.description||"";
+  const mImg=document.getElementById("m-img-preview");
+  mImg.src=s.image; mImg.style.display="block";
+  populateCategorySelect("m-category",s.category);
+  buildColorGrid("m-color-grid",s.colors||[]);
+  switchTab("m","url");
+  document.getElementById("modal").classList.add("open");
+}
+
+function closeModal(){document.getElementById("modal").classList.remove("open");}
+
+// ---- SAVE EDIT ----
+function saveEdit(e){
+  e.preventDefault();
+  const id=Number(document.getElementById("m-id").value);
+  const imgVal=getImageValue("m");
+  if(!imgVal){showToast("⚠️","Please provide a photo.");return;}
+  const sarees=getSarees();
+  const idx=sarees.findIndex(s=>s.id===id);
+  if(idx===-1)return;
+  sarees[idx]={
+    ...sarees[idx],
+    name:document.getElementById("m-name").value.trim(),
+    category:document.getElementById("m-category").value,
+    tag:document.getElementById("m-tag").value.trim(),
+    price:Number(document.getElementById("m-price").value),
+    oldPrice:Number(document.getElementById("m-old-price").value)||Number(document.getElementById("m-price").value),
+    image:imgVal,
+    colors:getSelectedColors("m-color-grid"),
+    description:document.getElementById("m-desc").value.trim()
+  };
+  saveSarees(sarees);
+  closeModal();
+  renderCollection();
+  showToast("💾","Changes saved successfully!");
+}
+
+function deleteSaree(id){
+  if(!confirm("Remove this saree from the collection?"))return;
+  saveSarees(getSarees().filter(s=>s.id!==id));
+  renderCollection();
+  showToast("🗑","Saree removed.");
+}
+
+function showToast(icon,msg){
+  const t=document.getElementById("toast");
+  document.getElementById("t-icon").textContent=icon;
+  document.getElementById("t-msg").innerHTML=msg;
+  t.classList.add("show");
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+function navigate(e,url){e.preventDefault();const pt=document.getElementById("pt");pt.classList.add("active");setTimeout(()=>window.location.href=url,450);}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+populateCategorySelect("s-category");
+buildColorGrid("color-grid",[]);
+renderCollection();
+window.addEventListener("load",()=>{const pt=document.getElementById("pt");pt.style.transform="translateY(100%)";setTimeout(()=>pt.style.display="none",600);});
+document.getElementById("modal").addEventListener("click",e=>{if(e.target===document.getElementById("modal"))closeModal();});
+</script>
+</body>
+</html>

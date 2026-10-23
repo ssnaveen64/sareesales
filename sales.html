@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sales Dashboard | NSS Textile</title>
+<style>
+:root{--wine:#7b1738;--wine-dark:#4c1027;--cream:#fff9f1;--ink:#2d2024;--muted:#756970;--green:#2e7d32;--blue:#1565c0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:#f4eef1;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-80px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fromRight{from{opacity:0;transform:translateX(80px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fromBottom{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.page-transition{position:fixed;inset:0;background:var(--wine-dark);z-index:9999;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
+.page-transition.active{transform:translateY(0);}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 5%;background:linear-gradient(135deg,var(--wine-dark),#8b1a3a);color:#fff;box-shadow:0 4px 20px #4c102740;animation:fromLeft .6s cubic-bezier(.22,1,.36,1) both;}
+.logo{font-family:Georgia,serif;font-size:22px;font-weight:bold;color:#fff;}
+.admin-badge{background:#fff;color:var(--wine);font-size:11px;padding:3px 10px;border-radius:12px;margin-left:8px;font-weight:bold;}
+nav a{color:#f9eaf0;font-size:13px;margin-left:16px;transition:color .2s;}
+nav a:hover{color:#fff;}
+.wrap{padding:28px 5%;max-width:1400px;margin:0 auto;}
+.page-title{font:30px Georgia,serif;color:var(--wine-dark);margin-bottom:24px;animation:fromLeft .6s .1s cubic-bezier(.22,1,.36,1) both;}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;}
+.stat-card{background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 14px #4c102710;display:flex;align-items:center;gap:16px;animation:popIn .6s cubic-bezier(.22,1,.36,1) both;}
+.stat-icon{font-size:32px;width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-icon.wine{background:#fdf0f4;}
+.stat-icon.green{background:#e8f5e9;}
+.stat-icon.blue{background:#e3f2fd;}
+.stat-icon.gold{background:#fff8e1;}
+.stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.stat-value{font-size:26px;font-weight:700;color:var(--wine-dark);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* FILTERS BAR */
+.filters-bar{background:#fff;border-radius:14px;padding:18px 22px;box-shadow:0 2px 14px #4c102710;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;animation:fromBottom .6s .15s cubic-bezier(.22,1,.36,1) both;}
+.filter-group{display:flex;flex-direction:column;gap:5px;}
+.filter-group label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.filter-group input,.filter-group select{padding:9px 12px;border:1.5px solid #e0d0d5;border-radius:8px;font-size:13px;color:var(--ink);background:#fff;min-width:140px;}
+.filter-group input:focus,.filter-group select:focus{outline:none;border-color:var(--wine);}
+.filter-btn{padding:10px 20px;background:var(--wine);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;align-self:flex-end;}
+.filter-btn:hover{background:var(--wine-dark);}
+.filter-btn.outline{background:#fff;color:var(--wine);border:1.5px solid var(--wine);}
+.filter-btn.outline:hover{background:var(--cream);}
+
+/* TABS */
+.tabs{display:flex;gap:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 14px #4c102710;margin-bottom:22px;animation:fromBottom .6s .2s cubic-bezier(.22,1,.36,1) both;}
+.tab-btn{flex:1;padding:13px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);border:none;transition:all .25s;border-bottom:3px solid transparent;}
+.tab-btn.active{color:var(--wine);border-bottom-color:var(--wine);background:#fdf8fa;}
+
+/* TABLE */
+.table-card{background:#fff;border-radius:14px;box-shadow:0 2px 14px #4c102710;overflow:hidden;animation:fromBottom .6s .25s cubic-bezier(.22,1,.36,1) both;}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #f0e9e6;flex-wrap:wrap;gap:10px;}
+.table-header h3{font:18px Georgia,serif;color:var(--wine-dark);}
+.export-btn{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;transition:background .2s;}
+.export-btn:hover{background:#1b5e20;}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{color:var(--wine);}
+th .sort-icon{margin-left:4px;opacity:.5;}
+td{padding:13px 14px;border-bottom:1px solid #f9f3f5;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fdf8fa;}
+.td-img{width:44px;height:44px;object-fit:cover;border-radius:8px;background:#f6eeee;}
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;}
+.badge-sold{background:#e8f5e9;color:#2e7d32;}
+.badge-unsold{background:#fce4ec;color:#c62828;}
+.badge-cat{background:#f5e8ec;color:var(--wine);}
+.time-badge{background:#e3f2fd;color:#1565c0;padding:3px 8px;border-radius:10px;font-size:11px;}
+.no-data{text-align:center;padding:50px;color:var(--muted);}
+.no-data .nd-icon{font-size:48px;margin-bottom:12px;}
+.pagination{display:flex;justify-content:center;align-items:center;gap:8px;padding:16px;border-top:1px solid #f0e9e6;}
+.pg-btn{padding:7px 13px;border:1.5px solid #e0d0d5;border-radius:6px;cursor:pointer;background:#fff;font-size:13px;transition:all .2s;}
+.pg-btn:hover,.pg-btn.active{background:var(--wine);color:#fff;border-color:var(--wine);}
+.pg-info{font-size:13px;color:var(--muted);}
+
+/* STOCK SECTION */
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:20px;}
+.stock-card{border:1.5px solid #eee5e8;border-radius:10px;overflow:hidden;background:#fff;animation:fromBottom .5s cubic-bezier(.22,1,.36,1) both;}
+.stock-card img{width:100%;height:120px;object-fit:cover;background:#f6eeee;}
+.stock-info{padding:12px;}
+.stock-info strong{font-size:13px;display:block;margin-bottom:6px;}
+.stock-bar-wrap{background:#f0e9e6;border-radius:6px;height:8px;margin:6px 0;}
+.stock-bar{height:8px;border-radius:6px;background:linear-gradient(90deg,var(--wine),#d5a64a);transition:width .8s ease;}
+.stock-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+
+/* CUSTOMER DETAIL MODAL */
+.cust-modal-overlay{position:fixed;inset:0;background:#0008;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.cust-modal-overlay.open{display:flex;}
+.cust-modal{background:#fff;border-radius:16px;padding:28px;width:min(560px,100%);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px #0006;animation:popIn .4s cubic-bezier(.22,1,.36,1);}
+.cust-modal-title{font:20px Georgia,serif;color:var(--wine-dark);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;}
+.cust-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);}
+.cust-close:hover{color:var(--wine);}
+.cust-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0e9e6;font-size:14px;}
+.cust-row:last-child{border-bottom:none;}
+.cust-row span:first-child{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+.cust-row span:last-child{font-weight:600;}
+
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,#24151b,#4c1027);color:#fff;padding:14px 20px;border-radius:10px;display:none;box-shadow:0 8px 30px #0004;z-index:9998;font-size:14px;gap:10px;}
+.toast.show{display:flex;align-items:center;}
+footer{background:var(--wine-dark);color:#f9eaf0;padding:16px 5%;text-align:center;font-size:13px;margin-top:40px;}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr);}.filters-bar{flex-direction:column;}}
+@media(max-width:560px){.stats-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page-transition" id="pt"></div>
+<header>
+  <div>
+    <a class="logo" href="saree_store.html" onclick="navigate(event,'saree_store.html')">NSS Textile</a>
+    <span class="admin-badge">SALES</span>
+  </div>
+  <nav>
+    <a href="add_saree.html" onclick="navigate(event,'add_saree.html')">← Admin</a>
+    <a href="saree_store.html" onclick="navigate(event,'saree_store.html')">Store</a>
+    <a href="cart.html" onclick="navigate(event,'cart.html')">Cart</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="page-title">📊 Sales Dashboard</div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row" id="stats-row"></div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label>From Date</label>
+      <input type="date" id="f-from"/>
+    </div>
+    <div class="filter-group">
+      <label>To Date</label>
+      <input type="date" id="f-to"/>
+    </div>
+    <div class="filter-group">
+      <label>Time of Day</label>
+      <select id="f-time">
+        <option value="">All Day</option>
+        <option value="morning">Morning (6am–12pm)</option>
+        <option value="afternoon">Afternoon (12pm–5pm)</option>
+        <option value="evening">Evening (5pm–9pm)</option>
+        <option value="night">Night (9pm–6am)</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="f-cat"><option value="">All Categories</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="">All</option>
+        <option value="sold">Sold</option>
+        <option value="unsold">Unsold</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Search Customer</label>
+      <input type="text" id="f-search" placeholder="Name / phone..."/>
+    </div>
+    <button class="filter-btn" onclick="applyFilters()">🔍 Apply</button>
+    <button class="filter-btn outline" onclick="clearFilters()">✕ Clear</button>
+    <button class="filter-btn" style="background:#1565c0" onclick="openAddSale()">➕ Add Sale</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('sales')">🧾 Sales Records</button>
+    <button class="tab-btn" onclick="switchTab('customers')">👤 Customer Details</button>
+    <button class="tab-btn" onclick="switchTab('stock')">📦 Stock Overview</button>
+  </div>
+
+  <!-- SALES TABLE -->
+  <div class="table-card" id="tab-sales">
+    <div class="table-header">
+      <h3>Sales Records</h3>
+      <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+    <div class="tbl-wrap">
+      <table id="sales-table">
+        <thead>
+          <tr>
+            <th onclick="sortBy('date')">Date <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('time')">Time <span class="sort-icon">↕</span></th>
+            <th>Photo</th>
+            <th onclick="sortBy('saree')">Saree <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('category')">Category <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('customer')">Customer <span class="sort-icon">↕</span></th>
+            <th>Phone</th>
+            <th onclick="sortBy('amount')">Amount <span class="sort-icon">↕</span></th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sales-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="sales-pagination"></div>
+  </div>
+
+  <!-- CUSTOMERS TABLE -->
+  <div class="table-card" id="tab-customers" style="display:none">
+    <div class="table-header">
+      <h3>Customer Details</h3>
+      <button class="export-btn" onclick="exportCustomerCSV()">⬇ Export CSV</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Sarees Bought</th>
+            <th>Categories</th>
+            <th>Total Spent</th>
+            <th>Last Purchase</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cust-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- STOCK -->
+  <div class="table-card" id="tab-stock" style="display:none">
+    <div class="table-header"><h3>Stock Overview</h3></div>
+    <div class="stock-grid" id="stock-grid"></div>
+  </div>
+</div>
+
+<!-- CUSTOMER DETAIL MODAL -->
+<div class="cust-modal-overlay" id="cust-modal">
+  <div class="cust-modal">
+    <div class="cust-modal-title">👤 Customer Details <button class="cust-close" onclick="closeCustModal()">✕</button></div>
+    <div id="cust-modal-body"></div>
+  </div>
+</div>
+
+<!-- ADD SALE MODAL -->
+<div class="cust-modal-overlay" id="add-sale-modal">
+  <div class="cust-modal">
+    <div class="cust-modal-title">➕ Record New Sale <button class="cust-close" onclick="closeAddSale()">✕</button></div>
+    <form onsubmit="saveSale(event)">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <div class="filter-group" style="width:100%"><label>Customer Name *</label><input type="text" id="ns-name" required placeholder="e.g. Priya Sharma"/></div>
+        <div class="filter-group" style="width:100%"><label>Phone</label><input type="text" id="ns-phone" placeholder="+91 00000 00000"/></div>
+        <div class="filter-group" style="width:100%"><label>Saree *</label><select id="ns-saree" required></select></div>
+        <div class="filter-group" style="width:100%"><label>Amount Paid (₹) *</label><input type="number" id="ns-amount" min="1" inputmode="numeric" onwheel="this.blur()" required/></div>
+        <div class="filter-group" style="width:100%"><label>Date *</label><input type="date" id="ns-date" required/></div>
+        <div class="filter-group" style="width:100%"><label>Time *</label><input type="time" id="ns-time" required/></div>
+        <div class="filter-group" style="width:100%"><label>Notes</label><input type="text" id="ns-notes" placeholder="Optional notes..."/></div>
+        <button type="submit" style="padding:12px;background:var(--wine);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;margin-top:6px;">💾 Save Sale</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer>© <span id="year"></span> NSS Textile Admin — Sales Dashboard</footer>
+<div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
+</body>
+</html>
+<script>
+const COLOR_MAP={Red:"#e53935",Maroon:"#7b1738",Pink:"#f48fb1",Rose:"#e91e8c",Orange:"#fb8c00",Yellow:"#fdd835",Green:"#43a047",Teal:"#00897b",Blue:"#1e88e5",Navy:"#1a237e",Purple:"#8e24aa",Lavender:"#ce93d8",Gold:"#d5a64a",Cream:"#fff9f1",White:"#f5f5f5",Black:"#212121",Grey:"#9e9e9e",Brown:"#6d4c41",Peach:"#ffccbc",Magenta:"#d81b60"};
+const defaultSarees=[
+  {id:1,name:"Classic Kanjivaram Silk",category:"Silk",price:4299,oldPrice:5299,tag:"Bestseller",colors:["Red","Gold","Maroon"],image:"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=700&q=80"},
+  {id:2,name:"Floral Cotton Saree",category:"Cotton",price:1299,oldPrice:1599,tag:"Everyday favourite",colors:["Blue","Green","Pink"],image:"https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80"},
+  {id:3,name:"Festive Designer Saree",category:"Designer",price:2499,oldPrice:2999,tag:"New arrival",colors:["Purple","Gold","Black"],image:"https://images.unsplash.com/photo-1583391733956-6c78276477e8?auto=format&fit=crop&w=700&q=80"},
+  {id:4,name:"Soft Silk Celebration Saree",category:"Silk",price:3499,oldPrice:3999,tag:"Festive edit",colors:["Maroon","Pink","Orange"],image:"https://images.unsplash.com/photo-1610189012906-4c9b9d0f8d4d?auto=format&fit=crop&w=700&q=80"}
+];
+
+// Demo sales data
+const demoSales=[
+  {id:1,sareeId:1,sareeName:"Classic Kanjivaram Silk",category:"Silk",image:defaultSarees[0].image,customer:"Priya Sharma",phone:"+91 98765 43210",amount:4299,date:"2025-01-15",time:"10:30",notes:"Gift wrap requested",status:"sold"},
+  {id:2,sareeId:2,sareeName:"Floral Cotton Saree",category:"Cotton",image:defaultSarees[1].image,customer:"Meena Ravi",phone:"+91 87654 32109",amount:1299,date:"2025-01-20",time:"14:15",notes:"",status:"sold"},
+  {id:3,sareeId:3,sareeName:"Festive Designer Saree",category:"Designer",image:defaultSarees[2].image,customer:"Lakshmi Nair",phone:"+91 76543 21098",amount:2499,date:"2025-02-05",time:"11:00",notes:"",status:"sold"},
+  {id:4,sareeId:4,sareeName:"Soft Silk Celebration Saree",category:"Silk",image:defaultSarees[3].image,customer:"Anitha Raj",phone:"+91 65432 10987",amount:3499,date:"2025-02-14",time:"18:45",notes:"Valentine special",status:"sold"},
+  {id:5,sareeId:1,sareeName:"Classic Kanjivaram Silk",category:"Silk",image:defaultSarees[0].image,customer:"Deepa Kumar",phone:"+91 54321 09876",amount:4299,date:"2025-03-01",time:"09:20",notes:"",status:"sold"},
+  {id:6,sareeId:2,sareeName:"Floral Cotton Saree",category:"Cotton",image:defaultSarees[1].image,customer:"Kavitha S",phone:"+91 43210 98765",amount:1299,date:"2025-03-10",time:"16:30",notes:"",status:"sold"},
+  {id:7,sareeId:3,sareeName:"Festive Designer Saree",category:"Designer",image:defaultSarees[2].image,customer:"Radha Menon",phone:"+91 32109 87654",amount:2499,date:"2025-04-02",time:"20:10",notes:"",status:"sold"},
+  {id:8,sareeId:4,sareeName:"Soft Silk Celebration Saree",category:"Silk",image:defaultSarees[3].image,customer:"Sujatha P",phone:"+91 21098 76543",amount:3499,date:"2025-04-18",time:"13:00",notes:"",status:"sold"}
+];
+
+function getSarees(){const s=localStorage.getItem("nss_sarees");return s?JSON.parse(s):defaultSarees;}
+function getSales(){const s=localStorage.getItem("nss_sales");return s?JSON.parse(s):demoSales;}
+function saveSales(arr){localStorage.setItem("nss_sales",JSON.stringify(arr));}
+
+let filteredSales=[];
+let sortKey="date";
+let sortDir=-1;
+let currentPage=1;
+const PAGE_SIZE=10;
+let activeTab="sales";
+
+function getTimeSlot(t){
+  if(!t)return"";
+  const h=parseInt(t.split(":")[0]);
+  if(h>=6&&h<12)return"morning";
+  if(h>=12&&h<17)return"afternoon";
+  if(h>=17&&h<21)return"evening";
+  return"night";
+}
+function timeSlotLabel(s){return{morning:"🌅 Morning",afternoon:"☀️ Afternoon",evening:"🌆 Evening",night:"🌙 Night"}[s]||s;}
+function fmtDate(d){if(!d)return"—";const p=d.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+function fmtAmt(a){return"₹"+Number(a).toLocaleString("en-IN");}
+
+function applyFilters(){
+  const from=document.getElementById("f-from").value;
+  const to=document.getElementById("f-to").value;
+  const time=document.getElementById("f-time").value;
+  const cat=document.getElementById("f-cat").value;
+  const status=document.getElementById("f-status").value;
+  const search=document.getElementById("f-search").value.toLowerCase();
+  const all=getSales();
+  filteredSales=all.filter(s=>{
+    if(from&&s.date<from)return false;
+    if(to&&s.date>to)return false;
+    if(time&&getTimeSlot(s.time)!==time)return false;
+    if(cat&&s.category!==cat)return false;
+    if(status&&s.status!==status)return false;
+    if(search&&!s.customer.toLowerCase().includes(search)&&!s.phone.includes(search))return false;
+    return true;
+  });
+  currentPage=1;
+  renderActiveTab();
+  updateStats();
+}
+
+function clearFilters(){
+  ["f-from","f-to","f-search"].forEach(id=>document.getElementById(id).value="");
+  ["f-time","f-cat","f-status"].forEach(id=>document.getElementById(id).value="");
+  filteredSales=[...getSales()];
+  currentPage=1;
+  renderActiveTab();
+  updateStats();
+}
+
+function sortBy(key){
+  if(sortKey===key)sortDir*=-1; else{sortKey=key;sortDir=-1;}
+  filteredSales.sort((a,b)=>{
+    let av=a[key]||"",bv=b[key]||"";
+    if(key==="amount"){av=Number(av);bv=Number(bv);}
+    return av<bv?sortDir:av>bv?-sortDir:0;
+  });
+  renderSalesTable();
+}
+
+function updateStats(){
+  const all=getSales();
+  const sold=all.filter(s=>s.status==="sold");
+  const sarees=getSarees();
+  const totalRevenue=sold.reduce((s,x)=>s+Number(x.amount),0);
+  const uniqueCustomers=new Set(sold.map(s=>s.customer)).size;
+  const unsoldCount=Math.max(0,sarees.length*3-sold.length);
+  document.getElementById("stats-row").innerHTML=`
+    <div class="stat-card" style="animation-delay:.05s"><div class="stat-icon wine">🧾</div><div><div class="stat-label">Total Sales</div><div class="stat-value">${sold.length}</div><div class="stat-sub">All time</div></div></div>
+    <div class="stat-card" style="animation-delay:.1s"><div class="stat-icon green">💰</div><div><div class="stat-label">Total Revenue</div><div class="stat-value">${fmtAmt(totalRevenue)}</div><div class="stat-sub">All time</div></div></div>
+    <div class="stat-card" style="animation-delay:.15s"><div class="stat-icon blue">👤</div><div><div class="stat-label">Customers</div><div class="stat-value">${uniqueCustomers}</div><div class="stat-sub">Unique buyers</div></div></div>
+    <div class="stat-card" style="animation-delay:.2s"><div class="stat-icon gold">📦</div><div><div class="stat-label">Unsold Stock</div><div class="stat-value">${unsoldCount}</div><div class="stat-sub">Estimated</div></div></div>`;
+}
+
+function renderSalesTable(){
+  const tbody=document.getElementById("sales-tbody");
+  const start=(currentPage-1)*PAGE_SIZE;
+  const page=filteredSales.slice(start,start+PAGE_SIZE);
+  if(!filteredSales.length){
+    tbody.innerHTML=`<tr><td colspan="10"><div class="no-data"><div class="nd-icon">📭</div><p>No sales records found.</p></div></td></tr>`;
+    document.getElementById("sales-pagination").innerHTML="";
+    return;
+  }
+  tbody.innerHTML=page.map((s,i)=>`
+    <tr>
+      <td>${fmtDate(s.date)}</td>
+      <td><span class="time-badge">${timeSlotLabel(getTimeSlot(s.time))} ${s.time||""}</span></td>
+      <td><img class="td-img" src="${s.image||""}" onerror="this.style.display='none'" alt=""/></td>
+      <td><strong>${s.sareeName}</strong></td>
+      <td><span class="badge badge-cat">${s.category}</span></td>
+      <td>${s.customer}</td>
+      <td>${s.phone||"—"}</td>
+      <td><strong>${fmtAmt(s.amount)}</strong></td>
+      <td><span class="badge ${s.status==="sold"?"badge-sold":"badge-unsold"}">${s.status==="sold"?"✅ Sold":"⏳ Unsold"}</span></td>
+      <td><button onclick="viewSale(${s.id})" style="padding:5px 10px;background:var(--wine);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">View</button>
+          <button onclick="deleteSale(${s.id})" style="padding:5px 10px;background:#fff;color:#c0a0a8;border:1px solid #e0d0d5;border-radius:6px;cursor:pointer;font-size:11px;margin-left:4px;">🗑</button></td>
+    </tr>`).join("");
+  renderPagination();
+}
+
+function renderPagination(){
+  const total=Math.ceil(filteredSales.length/PAGE_SIZE);
+  if(total<=1){document.getElementById("sales-pagination").innerHTML="";return;}
+  let html=`<span class="pg-info">Page ${currentPage} of ${total} (${filteredSales.length} records)</span>`;
+  if(currentPage>1)html+=`<button class="pg-btn" onclick="goPage(${currentPage-1})">‹ Prev</button>`;
+  for(let i=Math.max(1,currentPage-2);i<=Math.min(total,currentPage+2);i++)
+    html+=`<button class="pg-btn${i===currentPage?" active":""}" onclick="goPage(${i})">${i}</button>`;
+  if(currentPage<total)html+=`<button class="pg-btn" onclick="goPage(${currentPage+1})">Next ›</button>`;
+  document.getElementById("sales-pagination").innerHTML=html;
+}
+
+function goPage(p){currentPage=p;renderSalesTable();}
+
+function renderCustomersTable(){
+  const sales=getSales().filter(s=>s.status==="sold");
+  const map={};
+  sales.forEach(s=>{
+    if(!map[s.customer])map[s.customer]={name:s.customer,phone:s.phone||"—",items:[],total:0,lastDate:""};
+    map[s.customer].items.push(s);
+    map[s.customer].total+=Number(s.amount);
+    if(!map[s.customer].lastDate||s.date>map[s.customer].lastDate)map[s.customer].lastDate=s.date;
+  });
+  const customers=Object.values(map);
+  const tbody=document.getElementById("cust-tbody");
+  if(!customers.length){tbody.innerHTML=`<tr><td colspan="7"><div class="no-data"><div class="nd-icon">👤</div><p>No customer records yet.</p></div></td></tr>`;return;}
+  tbody.innerHTML=customers.map(c=>{
+    const cats=[...new Set(c.items.map(i=>i.category))].join(", ");
+    return`<tr>
+      <td><strong>${c.name}</strong></td>
+      <td>${c.phone}</td>
+      <td>${c.items.length}</td>
+      <td><span class="badge badge-cat">${cats}</span></td>
+      <td><strong>${fmtAmt(c.total)}</strong></td>
+      <td>${fmtDate(c.lastDate)}</td>
+      <td><button onclick="viewCustomer('${c.name.replace(/'/g,"\\'")}') " style="padding:5px 12px;background:var(--wine);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">Details</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function renderStockGrid(){
+  const sarees=getSarees();
+  const sales=getSales().filter(s=>s.status==="sold");
+  const grid=document.getElementById("stock-grid");
+  grid.innerHTML=sarees.map((s,i)=>{
+    const soldCount=sales.filter(x=>x.sareeId===s.id).length;
+    const total=Math.max(soldCount+2,5);
+    const pct=Math.round((soldCount/total)*100);
+    return`<div class="stock-card" style="animation-delay:${i*0.06}s">
+      <img src="${s.image}" alt="${s.name}" onerror="this.style.background='#f6eeee'">
+      <div class="stock-info">
+        <strong>${s.name}</strong>
+        <span class="badge badge-cat" style="margin-bottom:6px;display:inline-block">${s.category}</span>
+        <div class="stock-bar-wrap"><div class="stock-bar" style="width:${pct}%"></div></div>
+        <div class="stock-nums"><span>✅ Sold: ${soldCount}</span><span>📦 Available: ${total-soldCount}</span></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function viewSale(id){
+  const s=getSales().find(x=>x.id===id);
+  if(!s)return;
+  document.getElementById("cust-modal-body").innerHTML=`
+    <div class="cust-row"><span>Saree</span><span>${s.sareeName}</span></div>
+    <div class="cust-row"><span>Category</span><span>${s.category}</span></div>
+    <div class="cust-row"><span>Customer</span><span>${s.customer}</span></div>
+    <div class="cust-row"><span>Phone</span><span>${s.phone||"—"}</span></div>
+    <div class="cust-row"><span>Amount Paid</span><span>${fmtAmt(s.amount)}</span></div>
+    <div class="cust-row"><span>Date</span><span>${fmtDate(s.date)}</span></div>
+    <div class="cust-row"><span>Time</span><span>${s.time} (${timeSlotLabel(getTimeSlot(s.time))})</span></div>
+    <div class="cust-row"><span>Status</span><span>${s.status==="sold"?"✅ Sold":"⏳ Unsold"}</span></div>
+    ${s.notes?`<div class="cust-row"><span>Notes</span><span>${s.notes}</span></div>`:""}`;
+  document.getElementById("cust-modal").classList.add("open");
+}
+
+function viewCustomer(name){
+  const sales=getSales().filter(s=>s.customer===name&&s.status==="sold");
+  const total=sales.reduce((s,x)=>s+Number(x.amount),0);
+  const rows=sales.map(s=>`
+    <div class="cust-row"><span>${fmtDate(s.date)} ${s.time}</span><span>${s.sareeName} — ${fmtAmt(s.amount)}</span></div>`).join("");
+  document.getElementById("cust-modal-body").innerHTML=`
+    <div class="cust-row"><span>Name</span><span>${name}</span></div>
+    <div class="cust-row"><span>Phone</span><span>${sales[0]?.phone||"—"}</span></div>
+    <div class="cust-row"><span>Total Purchases</span><span>${sales.length} sarees</span></div>
+    <div class="cust-row"><span>Total Spent</span><span>${fmtAmt(total)}</span></div>
+    <div style="margin-top:12px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Purchase History</div>
+    ${rows}`;
+  document.getElementById("cust-modal").classList.add("open");
+}
+
+function closeCustModal(){document.getElementById("cust-modal").classList.remove("open");}
+
+function deleteSale(id){
+  if(!confirm("Delete this sale record?"))return;
+  saveSales(getSales().filter(s=>s.id!==id));
+  filteredSales=filteredSales.filter(s=>s.id!==id);
+  renderSalesTable();
+  updateStats();
+  showToast("🗑","Sale record deleted.");
+}
+
+function openAddSale(){
+  const sarees=getSarees();
+  document.getElementById("ns-saree").innerHTML=sarees.map(s=>`<option value="${s.id}" data-name="${s.name}" data-cat="${s.category}" data-img="${s.image}" data-price="${s.price}">${s.name} (${s.category})</option>`).join("");
+  const now=new Date();
+  document.getElementById("ns-date").value=now.toISOString().split("T")[0];
+  document.getElementById("ns-time").value=now.toTimeString().slice(0,5);
+  document.getElementById("add-sale-modal").classList.add("open");
+}
+function closeAddSale(){document.getElementById("add-sale-modal").classList.remove("open");}
+
+function saveSale(e){
+  e.preventDefault();
+  const sel=document.getElementById("ns-saree");
+  const opt=sel.options[sel.selectedIndex];
+  const sales=getSales();
+  const newId=sales.length?Math.max(...sales.map(s=>s.id))+1:1;
+  sales.push({
+    id:newId,
+    sareeId:Number(opt.value),
+    sareeName:opt.dataset.name,
+    category:opt.dataset.cat,
+    image:opt.dataset.img,
+    customer:document.getElementById("ns-name").value.trim(),
+    phone:document.getElementById("ns-phone").value.trim(),
+    amount:Number(document.getElementById("ns-amount").value),
+    date:document.getElementById("ns-date").value,
+    time:document.getElementById("ns-time").value,
+    notes:document.getElementById("ns-notes").value.trim(),
+    status:"sold"
+  });
+  saveSales(sales);
+  filteredSales=[...sales];
+  closeAddSale();
+  renderActiveTab();
+  updateStats();
+  showToast("✅","Sale recorded successfully!");
+}
+
+function switchTab(tab){
+  activeTab=tab;
+  document.getElementById("tab-sales").style.display=tab==="sales"?"block":"none";
+  document.getElementById("tab-customers").style.display=tab==="customers"?"block":"none";
+  document.getElementById("tab-stock").style.display=tab==="stock"?"block":"none";
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>{
+    b.classList.toggle("active",["sales","customers","stock"][i]===tab);
+  });
+  renderActiveTab();
+}
+
+function renderActiveTab(){
+  if(activeTab==="sales")renderSalesTable();
+  else if(activeTab==="customers")renderCustomersTable();
+  else renderStockGrid();
+}
+
+function exportCSV(){
+  const rows=[["Date","Time","Time Slot","Saree","Category","Customer","Phone","Amount","Status","Notes"]];
+  filteredSales.forEach(s=>rows.push([s.date,s.time,getTimeSlot(s.time),s.sareeName,s.category,s.customer,s.phone||"",s.amount,s.status,s.notes||""]));
+  downloadCSV(rows,"nss_sales.csv");
+}
+function exportCustomerCSV(){
+  const sales=getSales().filter(s=>s.status==="sold");
+  const map={};
+  sales.forEach(s=>{if(!map[s.customer])map[s.customer]={name:s.customer,phone:s.phone||"",count:0,total:0};map[s.customer].count++;map[s.customer].total+=Number(s.amount);});
+  const rows=[["Customer","Phone","Sarees Bought","Total Spent"]];
+  Object.values(map).forEach(c=>rows.push([c.name,c.phone,c.count,c.total]));
+  downloadCSV(rows,"nss_customers.csv");
+}
+function downloadCSV(rows,filename){
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download=filename;a.click();
+}
+
+function populateCatFilter(){
+  const cats=[...new Set(getSarees().map(s=>s.category))];
+  const sel=document.getElementById("f-cat");
+  sel.innerHTML=`<option value="">All Categories</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+}
+
+function showToast(icon,msg){
+  const t=document.getElementById("toast");
+  document.getElementById("t-icon").textContent=icon;
+  document.getElementById("t-msg").innerHTML=msg;
+  t.classList.add("show");
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.classList.remove("show"),2800);
+}
+function navigate(e,url){e.preventDefault();const pt=document.getElementById("pt");pt.classList.add("active");setTimeout(()=>window.location.href=url,450);}
+
+document.getElementById("year").textContent=new Date().getFullYear();
+filteredSales=[...getSales()];
+populateCatFilter();
+updateStats();
+renderSalesTable();
+window.addEventListener("load",()=>{const pt=document.getElementById("pt");pt.style.transform="translateY(100%)";setTimeout(()=>pt.style.display="none",600);});
+document.getElementById("cust-modal").addEventListener("click",e=>{if(e.target===document.getElementById("cust-modal"))closeCustModal();});
+document.getElementById("add-sale-modal").addEventListener("click",e=>{if(e.target===document.getElementById("add-sale-modal"))closeAddSale();});
+</script>
