@@ -10,20 +10,21 @@
 body{font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:#f4eef1;min-height:100vh;}
 a{color:inherit;text-decoration:none;}
 
-.page-transition{position:fixed;inset:0;background:var(--wine-dark);z-index:9999;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
-.page-transition.active{transform:translateY(0);}
+/* PAGE TRANSITION — diagonal sweep top-left to bottom-right */
+@keyframes diagIn{from{clip-path:polygon(0 0,0 0,0 0,0 0)}to{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}}
+@keyframes diagOut{from{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}to{clip-path:polygon(100% 0,100% 0,100% 100%,100% 100%)}}
+.page-transition{position:fixed;inset:0;background:linear-gradient(135deg,var(--wine-dark) 0%,#8b1a3a 100%);z-index:9999;clip-path:polygon(0 0,0 0,0 0,0 0);transition:none;}
+.page-transition.active{animation:diagIn .5s cubic-bezier(.77,0,.18,1) forwards;}
 
-/* EXPLOSION ENTRY ANIMATIONS */
-@keyframes fromTop{from{opacity:0;transform:translateY(-120px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes fromBottom{from{opacity:0;transform:translateY(120px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes fromLeft{from{opacity:0;transform:translateX(-120px) scale(.8)}to{opacity:1;transform:translateX(0) scale(1)}}
-@keyframes fromRight{from{opacity:0;transform:translateX(120px) scale(.8)}to{opacity:1;transform:translateX(0) scale(1)}}
-@keyframes popIn{from{opacity:0;transform:scale(.4) rotate(-8deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
-.from-top{animation:fromTop .7s cubic-bezier(.22,1,.36,1) both;}
-.from-bottom{animation:fromBottom .7s cubic-bezier(.22,1,.36,1) both;}
-.from-left{animation:fromLeft .7s cubic-bezier(.22,1,.36,1) both;}
-.from-right{animation:fromRight .7s cubic-bezier(.22,1,.36,1) both;}
-.pop-in{animation:popIn .6s cubic-bezier(.22,1,.36,1) both;}
+/* ── PREMIUM SCROLL REVEAL ── */
+[data-sr]{will-change:transform,opacity;transition:transform .75s cubic-bezier(.16,1,.3,1),opacity .75s cubic-bezier(.16,1,.3,1);transition-delay:var(--sr-delay,0s);}
+[data-sr="left"]{opacity:0;transform:translateX(-72px) scale(.97);}
+[data-sr="right"]{opacity:0;transform:translateX(72px) scale(.97);}
+[data-sr="up"]{opacity:0;transform:translateY(56px) scale(.97);}
+[data-sr="scale"]{opacity:0;transform:scale(.88);}
+[data-sr].sr-in{opacity:1;transform:none;}
+[data-sr].sr-out-left{opacity:0;transform:translateX(-60px) scale(.96);transition-duration:.45s;}
+[data-sr].sr-out-right{opacity:0;transform:translateX(60px) scale(.96);transition-duration:.45s;}
 
 header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 5%;background:linear-gradient(135deg,var(--wine-dark),#8b1a3a);color:#fff;box-shadow:0 4px 20px #4c102740;}
 .logo{font-family:Georgia,serif;font-size:24px;font-weight:bold;color:#fff;}
@@ -86,7 +87,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
 
 /* SAREE CARD */
-.saree-card{border:1.5px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;animation:fadeUp .4s ease both;}
+.saree-card{border:1.5px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;}
 .saree-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px #4c102718;}
 .saree-card img{width:100%;height:150px;object-fit:cover;display:block;background:#f6eeee;}
 .saree-card-info{padding:12px;}
@@ -129,15 +130,23 @@ footer{background:var(--wine-dark);color:#f9eaf0;padding:18px 5%;text-align:cent
     <span class="admin-badge">ADMIN</span>
   </div>
   <nav>
-    <a href="sales.html" onclick="navigate(event,'sales.html')">📊 Sales</a>
+    <a href="#" onclick="showAdminTab('inventory');return false;" id="nav-inventory">🗂 Inventory</a>
+    <a href="#" onclick="showAdminTab('sales');return false;" id="nav-sales">📊 Sales</a>
     <a href="saree_store.html" onclick="navigate(event,'saree_store.html')">← Store</a>
-    <a href="cart.html" onclick="navigate(event,'cart.html')">Cart</a>
   </nav>
 </header>
 
+<!-- ADMIN TABS -->
+<div style="background:#fff;border-bottom:2px solid #f0e9e6;padding:0 5%;display:flex;gap:0;">
+  <button id="tab-inventory" onclick="showAdminTab('inventory')" style="padding:14px 24px;border:none;background:none;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid var(--wine);color:var(--wine);">🗂 Inventory</button>
+  <button id="tab-sales" onclick="showAdminTab('sales')" style="padding:14px 24px;border:none;background:none;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);">📊 Sales</button>
+</div>
+
+<!-- INVENTORY SECTION -->
+<div id="section-inventory">
 <div class="page">
   <!-- ADD FORM -->
-  <div class="card from-left" style="animation-delay:.05s">
+  <div class="card" data-sr="left" style="--sr-delay:.05s">
     <div class="card-title">➕ <span id="form-title">Add New Saree</span></div>
     <form id="saree-form" onsubmit="submitForm(event)">
       <input type="hidden" id="edit-id" value=""/>
@@ -179,15 +188,134 @@ footer{background:var(--wine-dark);color:#f9eaf0;padding:18px 5%;text-align:cent
       <button class="btn" type="submit" id="submit-btn">✅ Add to Collection</button>
       <button class="btn btn-outline" type="button" onclick="resetForm()">Clear Form</button>
     </form>
+    <div style="margin-top:24px;border-top:1.5px solid #f0e9e6;padding-top:20px;">
+      <div class="card-title" style="font-size:16px;margin-bottom:12px;">🖼 Home Page Hero Image</div>
+      <div class="upload-tabs" id="hero-upload-tabs">
+        <button type="button" class="upload-tab active" onclick="switchHeroTab('url')">🔗 URL</button>
+        <button type="button" class="upload-tab" onclick="switchHeroTab('file')">📁 Upload</button>
+      </div>
+      <div id="hero-tab-url" style="margin-top:8px;">
+        <input type="url" id="hero-url-input" placeholder="https://..." oninput="previewHero(this.value)"/>
+      </div>
+      <div id="hero-tab-file" style="display:none;margin-top:8px;">
+        <div class="upload-area" onclick="document.getElementById('hero-file-input').click()">
+          <div class="upload-icon">📂</div>
+          <strong>Click to choose photo</strong>
+          <p>JPG, PNG, WEBP supported</p>
+          <input type="file" id="hero-file-input" accept="image/*" onchange="handleHeroUpload(this)"/>
+        </div>
+      </div>
+      <img id="hero-preview" class="preview-img" alt="Hero Preview"/>
+      <button class="btn" style="margin-top:10px;" onclick="saveHeroImage()">💾 Set as Hero Image</button>
+    </div>
   </div>
 
   <!-- COLLECTION -->
-  <div class="card from-right" style="animation-delay:.1s">
+  <div class="card" data-sr="right" style="--sr-delay:.1s">
     <div class="collection-header">
       <h3>Collection (<span id="saree-count">0</span>)</h3>
       <input class="search-box" type="text" placeholder="🔍 Search sarees..." oninput="renderCollection(this.value)"/>
     </div>
     <div class="collection-grid" id="collection-grid"></div>
+  </div>
+</div>
+</div><!-- end section-inventory -->
+
+<!-- SALES SECTION -->
+<div id="section-sales" style="display:none;padding:28px 5%;max-width:1400px;margin:0 auto;">
+
+  <!-- STAT CARDS -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:28px;" id="s-stats-row"></div>
+
+  <!-- FILTERS -->
+  <div style="background:#fff;border-radius:14px;padding:18px 22px;box-shadow:0 2px 14px #4c102710;margin-bottom:22px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;">
+    <div style="display:flex;flex-direction:column;gap:5px;"><label>From Date</label><input type="date" id="sf-from"/></div>
+    <div style="display:flex;flex-direction:column;gap:5px;"><label>To Date</label><input type="date" id="sf-to"/></div>
+    <div style="display:flex;flex-direction:column;gap:5px;"><label>Category</label><select id="sf-cat"><option value="">All Categories</option></select></div>
+    <div style="display:flex;flex-direction:column;gap:5px;"><label>Status</label><select id="sf-status"><option value="">All</option><option value="sold">Sold</option><option value="unsold">Unsold</option></select></div>
+    <div style="display:flex;flex-direction:column;gap:5px;"><label>Search Customer</label><input type="text" id="sf-search" placeholder="Name / phone..."/></div>
+    <button class="btn" style="width:auto;margin-top:0;padding:10px 20px;" onclick="sApplyFilters()">🔍 Apply</button>
+    <button class="btn btn-outline" style="width:auto;margin-top:0;padding:10px 20px;" onclick="sClearFilters()">✕ Clear</button>
+    <button class="btn" style="width:auto;margin-top:0;padding:10px 20px;background:#1565c0;" onclick="sOpenAddSale()">➕ Add Sale</button>
+  </div>
+
+  <!-- TABS -->
+  <div style="display:flex;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 14px #4c102710;margin-bottom:22px;">
+    <button class="s-tab-btn" onclick="sSwitchTab('sales')" style="flex:1;padding:13px;font-size:13px;font-weight:700;cursor:pointer;background:#fdf8fa;color:var(--wine);border:none;border-bottom:3px solid var(--wine);">🧾 Sales Records</button>
+    <button class="s-tab-btn" onclick="sSwitchTab('customers')" style="flex:1;padding:13px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);border:none;border-bottom:3px solid transparent;">👤 Customer Details</button>
+    <button class="s-tab-btn" onclick="sSwitchTab('stock')" style="flex:1;padding:13px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--muted);border:none;border-bottom:3px solid transparent;">📦 Stock Overview</button>
+  </div>
+
+  <!-- SALES TABLE -->
+  <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px #4c102710;overflow:hidden;" id="s-tab-sales">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #f0e9e6;">
+      <h3 style="font:18px Georgia,serif;color:var(--wine-dark);">Sales Records</h3>
+      <button onclick="sExportCSV()" style="padding:8px 16px;background:#2e7d32;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">⬇ Export CSV</button>
+    </div>
+    <div style="overflow-x:auto;"><table id="s-sales-table" style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;cursor:pointer;" onclick="sSortBy('date')">Date ↕</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Time</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Photo</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;cursor:pointer;" onclick="sSortBy('sareeName')">Saree ↕</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Category</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;cursor:pointer;" onclick="sSortBy('customer')">Customer ↕</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Phone</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;cursor:pointer;" onclick="sSortBy('amount')">Amount ↕</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Status</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Actions</th>
+    </tr></thead><tbody id="s-sales-tbody"></tbody></table></div>
+    <div id="s-sales-pagination" style="display:flex;justify-content:center;align-items:center;gap:8px;padding:16px;border-top:1px solid #f0e9e6;"></div>
+  </div>
+
+  <!-- CUSTOMERS TABLE -->
+  <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px #4c102710;overflow:hidden;display:none;" id="s-tab-customers">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid #f0e9e6;">
+      <h3 style="font:18px Georgia,serif;color:var(--wine-dark);">Customer Details</h3>
+      <button onclick="sExportCustomerCSV()" style="padding:8px 16px;background:#2e7d32;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;">⬇ Export CSV</button>
+    </div>
+    <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Customer</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Phone</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Sarees Bought</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Categories</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Total Spent</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Last Purchase</th>
+      <th style="background:#fdf8fa;padding:12px 14px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #f0e9e6;">Actions</th>
+    </tr></thead><tbody id="s-cust-tbody"></tbody></table></div>
+  </div>
+
+  <!-- STOCK -->
+  <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px #4c102710;overflow:hidden;display:none;" id="s-tab-stock">
+    <div style="padding:18px 22px;border-bottom:1px solid #f0e9e6;"><h3 style="font:18px Georgia,serif;color:var(--wine-dark);">Stock Overview</h3></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:20px;" id="s-stock-grid"></div>
+  </div>
+
+</div><!-- end section-sales -->
+
+<!-- CUSTOMER VIEW MODAL -->
+<div style="position:fixed;inset:0;background:#0008;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);" id="s-cust-modal">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:min(560px,100%);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px #0006;">
+    <div style="font:20px Georgia,serif;color:var(--wine-dark);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;">👤 Details <button onclick="document.getElementById('s-cust-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button></div>
+    <div id="s-cust-modal-body"></div>
+  </div>
+</div>
+
+<!-- ADD SALE MODAL -->
+<div style="position:fixed;inset:0;background:#0008;z-index:2000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);" id="s-add-sale-modal">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:min(560px,100%);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px #0006;">
+    <div style="font:20px Georgia,serif;color:var(--wine-dark);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;">➕ Record New Sale <button onclick="document.getElementById('s-add-sale-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button></div>
+    <form onsubmit="sSaveSale(event)">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Customer Name *</label><input type="text" id="sn-name" required placeholder="e.g. Priya Sharma"/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Phone</label><input type="text" id="sn-phone" placeholder="+91 00000 00000"/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Saree *</label><select id="sn-saree" required></select></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Amount Paid (₹) *</label><input type="number" id="sn-amount" min="1" inputmode="numeric" onwheel="this.blur()" required/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Date *</label><input type="date" id="sn-date" required/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Time *</label><input type="time" id="sn-time" required/></div>
+        <div style="display:flex;flex-direction:column;gap:5px;"><label>Notes</label><input type="text" id="sn-notes" placeholder="Optional notes..."/></div>
+        <button type="submit" style="padding:12px;background:var(--wine);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;margin-top:6px;">💾 Save Sale</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -353,7 +481,7 @@ function renderCollection(search=""){
   if(!filtered.length){grid.innerHTML=`<p style="color:var(--muted);padding:20px">No sarees found.</p>`;return;}
   grid.innerHTML=filtered.map((s,i)=>{
     const dots=(s.colors||[]).map(c=>`<span class="card-color-dot" style="background:${COLOR_MAP[c]||'#ccc'}" title="${c}"></span>`).join("");
-    return `<div class="saree-card" style="animation:fromBottom .5s ${i*0.06}s cubic-bezier(.22,1,.36,1) both">
+    return `<div class="saree-card" data-sr="up" style="--sr-delay:${i*0.06}s">
       <img src="${s.image}" alt="${s.name}" onerror="this.style.background='#f6eeee'">
       <div class="saree-card-info">
         <span class="cat-tag">${s.category}</span>
@@ -369,6 +497,7 @@ function renderCollection(search=""){
       </div>
     </div>`;
   }).join("");
+  initSR();
 }
 
 // ---- SUBMIT ADD FORM ----
@@ -412,18 +541,19 @@ function openEdit(id){
   const s=sarees.find(x=>x.id===id);
   if(!s)return;
   window._mFileData=null;
+  window._mExistingImage=s.image;
   document.getElementById("m-id").value=s.id;
   document.getElementById("m-name").value=s.name;
   document.getElementById("m-tag").value=s.tag||"";
   document.getElementById("m-price").value=s.price;
   document.getElementById("m-old-price").value=s.oldPrice||"";
-  document.getElementById("m-image").value=s.image;
+  document.getElementById("m-image").value=s.image.startsWith('data:') ? '' : s.image;
   document.getElementById("m-desc").value=s.description||"";
   const mImg=document.getElementById("m-img-preview");
   mImg.src=s.image; mImg.style.display="block";
   populateCategorySelect("m-category",s.category);
   buildColorGrid("m-color-grid",s.colors||[]);
-  switchTab("m","url");
+  switchTab("m",s.image.startsWith('data:') ? 'file' : 'url');
   document.getElementById("modal").classList.add("open");
 }
 
@@ -433,7 +563,7 @@ function closeModal(){document.getElementById("modal").classList.remove("open");
 function saveEdit(e){
   e.preventDefault();
   const id=Number(document.getElementById("m-id").value);
-  const imgVal=getImageValue("m");
+  const imgVal=getImageValue("m") || window._mExistingImage;
   if(!imgVal){showToast("⚠️","Please provide a photo.");return;}
   const sarees=getSarees();
   const idx=sarees.findIndex(s=>s.id===id);
@@ -471,14 +601,329 @@ function showToast(icon,msg){
   window._tt=setTimeout(()=>t.classList.remove("show"),2800);
 }
 
-function navigate(e,url){e.preventDefault();const pt=document.getElementById("pt");pt.classList.add("active");setTimeout(()=>window.location.href=url,450);}
+// ---- SALES DATA ----
+const demoSales=[
+  {id:1,sareeId:1,sareeName:"Classic Kanjivaram Silk",category:"Silk",image:defaultSarees[0].image,customer:"Priya Sharma",phone:"+91 98765 43210",amount:4299,date:"2025-01-15",time:"10:30",notes:"Gift wrap",status:"sold"},
+  {id:2,sareeId:2,sareeName:"Floral Cotton Saree",category:"Cotton",image:defaultSarees[1].image,customer:"Meena Ravi",phone:"+91 87654 32109",amount:1299,date:"2025-01-20",time:"14:15",notes:"",status:"sold"},
+  {id:3,sareeId:3,sareeName:"Festive Designer Saree",category:"Designer",image:defaultSarees[2].image,customer:"Lakshmi Nair",phone:"+91 76543 21098",amount:2499,date:"2025-02-05",time:"11:00",notes:"",status:"sold"},
+  {id:4,sareeId:4,sareeName:"Soft Silk Celebration Saree",category:"Silk",image:defaultSarees[3].image,customer:"Anitha Raj",phone:"+91 65432 10987",amount:3499,date:"2025-02-14",time:"18:45",notes:"",status:"sold"}
+];
+function getSales(){const s=localStorage.getItem("nss_sales");return s?JSON.parse(s):demoSales;}
+function saveSales(arr){localStorage.setItem("nss_sales",JSON.stringify(arr));}
+function fmtDate(d){if(!d)return"—";const p=d.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+function fmtAmt(a){return"\u20b9"+Number(a).toLocaleString("en-IN");}
+function getTimeSlot(t){if(!t)return"";const h=parseInt(t.split(":")[0]);if(h>=6&&h<12)return"morning";if(h>=12&&h<17)return"afternoon";if(h>=17&&h<21)return"evening";return"night";}
+function timeSlotLabel(s){return{morning:"\uD83C\uDF05 Morning",afternoon:"\u2600\uFE0F Afternoon",evening:"\uD83C\uDF06 Evening",night:"\uD83C\uDF19 Night"}[s]||s;}
+
+let sFiltered=[], sSortKey="date", sSortDir=-1, sPage=1, sSalesTab="sales";
+const S_PAGE=10;
+
+function sInit(){
+  sFiltered=[...getSales()];
+  sUpdateStats();
+  sPopulateCatFilter();
+  sSwitchTab('sales');
+}
+
+function sPopulateCatFilter(){
+  const cats=[...new Set(getSarees().map(s=>s.category))];
+  document.getElementById('sf-cat').innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+
+function sUpdateStats(){
+  const all=getSales(), sold=all.filter(s=>s.status==="sold");
+  const rev=sold.reduce((s,x)=>s+Number(x.amount),0);
+  const uniq=new Set(sold.map(s=>s.customer)).size;
+  document.getElementById('s-stats-row').innerHTML=`
+    <div style="background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 14px #4c102710;display:flex;align-items:center;gap:16px;">
+      <div style="font-size:32px;width:56px;height:56px;border-radius:14px;background:#fdf0f4;display:flex;align-items:center;justify-content:center;">🧾</div>
+      <div><div style="font-size:12px;color:var(--muted);text-transform:uppercase;">Total Sales</div><div style="font-size:26px;font-weight:700;color:var(--wine-dark);">${sold.length}</div></div></div>
+    <div style="background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 14px #4c102710;display:flex;align-items:center;gap:16px;">
+      <div style="font-size:32px;width:56px;height:56px;border-radius:14px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;">💰</div>
+      <div><div style="font-size:12px;color:var(--muted);text-transform:uppercase;">Revenue</div><div style="font-size:26px;font-weight:700;color:var(--wine-dark);">${fmtAmt(rev)}</div></div></div>
+    <div style="background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 14px #4c102710;display:flex;align-items:center;gap:16px;">
+      <div style="font-size:32px;width:56px;height:56px;border-radius:14px;background:#e3f2fd;display:flex;align-items:center;justify-content:center;">👤</div>
+      <div><div style="font-size:12px;color:var(--muted);text-transform:uppercase;">Customers</div><div style="font-size:26px;font-weight:700;color:var(--wine-dark);">${uniq}</div></div></div>
+    <div style="background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 14px #4c102710;display:flex;align-items:center;gap:16px;">
+      <div style="font-size:32px;width:56px;height:56px;border-radius:14px;background:#fff8e1;display:flex;align-items:center;justify-content:center;">📦</div>
+      <div><div style="font-size:12px;color:var(--muted);text-transform:uppercase;">Sarees</div><div style="font-size:26px;font-weight:700;color:var(--wine-dark);">${getSarees().length}</div></div></div>`;
+}
+
+function sApplyFilters(){
+  const from=document.getElementById('sf-from').value;
+  const to=document.getElementById('sf-to').value;
+  const cat=document.getElementById('sf-cat').value;
+  const status=document.getElementById('sf-status').value;
+  const search=document.getElementById('sf-search').value.toLowerCase();
+  sFiltered=getSales().filter(s=>{
+    if(from&&s.date<from)return false;
+    if(to&&s.date>to)return false;
+    if(cat&&s.category!==cat)return false;
+    if(status&&s.status!==status)return false;
+    if(search&&!s.customer.toLowerCase().includes(search)&&!(s.phone||'').includes(search))return false;
+    return true;
+  });
+  sPage=1; sRenderActive(); sUpdateStats();
+}
+
+function sClearFilters(){
+  ['sf-from','sf-to','sf-search'].forEach(id=>document.getElementById(id).value='');
+  ['sf-cat','sf-status'].forEach(id=>document.getElementById(id).value='');
+  sFiltered=[...getSales()]; sPage=1; sRenderActive(); sUpdateStats();
+}
+
+function sSortBy(key){
+  if(sSortKey===key)sSortDir*=-1; else{sSortKey=key;sSortDir=-1;}
+  sFiltered.sort((a,b)=>{let av=a[key]||'',bv=b[key]||'';if(key==='amount'){av=Number(av);bv=Number(bv);}return av<bv?sSortDir:av>bv?-sSortDir:0;});
+  sRenderSalesTable();
+}
+
+function sSwitchTab(tab){
+  sSalesTab=tab;
+  ['sales','customers','stock'].forEach(t=>{
+    document.getElementById('s-tab-'+t).style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.s-tab-btn').forEach((b,i)=>{
+    const active=['sales','customers','stock'][i]===tab;
+    b.style.background=active?'#fdf8fa':'#fff';
+    b.style.color=active?'var(--wine)':'var(--muted)';
+    b.style.borderBottom=active?'3px solid var(--wine)':'3px solid transparent';
+  });
+  sRenderActive();
+}
+
+function sRenderActive(){
+  if(sSalesTab==='sales')sRenderSalesTable();
+  else if(sSalesTab==='customers')sRenderCustomers();
+  else sRenderStock();
+}
+
+function sRenderSalesTable(){
+  const tbody=document.getElementById('s-sales-tbody');
+  const start=(sPage-1)*S_PAGE, page=sFiltered.slice(start,start+S_PAGE);
+  if(!sFiltered.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted);">No sales records found.</td></tr>';document.getElementById('s-sales-pagination').innerHTML='';return;}
+  tbody.innerHTML=page.map(s=>`<tr>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${fmtDate(s.date)}</td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><span style="background:#e3f2fd;color:#1565c0;padding:3px 8px;border-radius:10px;font-size:11px;">${timeSlotLabel(getTimeSlot(s.time))} ${s.time||''}</span></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><img src="${s.image||''}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'"/></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><strong>${s.sareeName}</strong></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><span style="background:#f5e8ec;color:var(--wine);padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">${s.category}</span></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${s.customer}</td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${s.phone||'—'}</td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><strong>${fmtAmt(s.amount)}</strong></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><span style="background:${s.status==='sold'?'#e8f5e9':'#fce4ec'};color:${s.status==='sold'?'#2e7d32':'#c62828'};padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">${s.status==='sold'?'✅ Sold':'⏳ Unsold'}</span></td>
+    <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">
+      <button onclick="sViewSale(${s.id})" style="padding:5px 10px;background:var(--wine);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">View</button>
+      <button onclick="sDeleteSale(${s.id})" style="padding:5px 10px;background:#fff;color:#c0a0a8;border:1px solid #e0d0d5;border-radius:6px;cursor:pointer;font-size:11px;margin-left:4px;">🗑</button>
+    </td></tr>`).join('');
+  sRenderPagination();
+}
+
+function sRenderPagination(){
+  const total=Math.ceil(sFiltered.length/S_PAGE);
+  const el=document.getElementById('s-sales-pagination');
+  if(total<=1){el.innerHTML='';return;}
+  let h=`<span style="font-size:13px;color:var(--muted);">Page ${sPage} of ${total}</span>`;
+  if(sPage>1)h+=`<button onclick="sGoPage(${sPage-1})" style="padding:7px 13px;border:1.5px solid #e0d0d5;border-radius:6px;cursor:pointer;background:#fff;font-size:13px;">‹</button>`;
+  for(let i=Math.max(1,sPage-2);i<=Math.min(total,sPage+2);i++)
+    h+=`<button onclick="sGoPage(${i})" style="padding:7px 13px;border:1.5px solid ${i===sPage?'var(--wine)':'#e0d0d5'};border-radius:6px;cursor:pointer;background:${i===sPage?'var(--wine)':'#fff'};color:${i===sPage?'#fff':'inherit'};font-size:13px;">${i}</button>`;
+  if(sPage<total)h+=`<button onclick="sGoPage(${sPage+1})" style="padding:7px 13px;border:1.5px solid #e0d0d5;border-radius:6px;cursor:pointer;background:#fff;font-size:13px;">›</button>`;
+  el.innerHTML=h;
+}
+function sGoPage(p){sPage=p;sRenderSalesTable();}
+
+function sRenderCustomers(){
+  const sales=getSales().filter(s=>s.status==='sold');
+  const map={};
+  sales.forEach(s=>{
+    if(!map[s.customer])map[s.customer]={name:s.customer,phone:s.phone||'—',items:[],total:0,lastDate:''};
+    map[s.customer].items.push(s);
+    map[s.customer].total+=Number(s.amount);
+    if(!map[s.customer].lastDate||s.date>map[s.customer].lastDate)map[s.customer].lastDate=s.date;
+  });
+  const tbody=document.getElementById('s-cust-tbody');
+  const customers=Object.values(map);
+  if(!customers.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">No customers yet.</td></tr>';return;}
+  tbody.innerHTML=customers.map(c=>{
+    const cats=[...new Set(c.items.map(i=>i.category))].join(', ');
+    return`<tr>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><strong>${c.name}</strong></td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${c.phone}</td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${c.items.length}</td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><span style="background:#f5e8ec;color:var(--wine);padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;">${cats}</span></td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><strong>${fmtAmt(c.total)}</strong></td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;">${fmtDate(c.lastDate)}</td>
+      <td style="padding:13px 14px;border-bottom:1px solid #f9f3f5;"><button onclick="sViewCustomer('${c.name.replace(/'/g,"\\'")}')"
+        style="padding:5px 12px;background:var(--wine);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;">Details</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function sRenderStock(){
+  const sarees=getSarees(), sales=getSales().filter(s=>s.status==='sold');
+  document.getElementById('s-stock-grid').innerHTML=sarees.map((s,i)=>{
+    const sold=sales.filter(x=>x.sareeId===s.id).length;
+    const total=Math.max(sold+2,5), pct=Math.round((sold/total)*100);
+    return`<div style="border:1.5px solid #eee5e8;border-radius:10px;overflow:hidden;background:#fff;">
+      <img src="${s.image}" style="width:100%;height:120px;object-fit:cover;" onerror="this.style.background='#f6eeee'">
+      <div style="padding:12px;">
+        <strong style="font-size:13px;display:block;margin-bottom:6px;">${s.name}</strong>
+        <div style="background:#f0e9e6;border-radius:6px;height:8px;margin:6px 0;">
+          <div style="height:8px;border-radius:6px;background:linear-gradient(90deg,var(--wine),#d5a64a);width:${pct}%;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);"><span>✅ Sold: ${sold}</span><span>📦 Left: ${total-sold}</span></div>
+      </div></div>`;
+  }).join('');
+}
+
+function sViewSale(id){
+  const s=getSales().find(x=>x.id===id); if(!s)return;
+  document.getElementById('s-cust-modal-body').innerHTML=`
+    ${[['Saree',s.sareeName],['Category',s.category],['Customer',s.customer],['Phone',s.phone||'—'],['Amount',fmtAmt(s.amount)],['Date',fmtDate(s.date)],['Time',s.time],['Status',s.status==='sold'?'✅ Sold':'⏳ Unsold'],['Notes',s.notes||'—']]
+    .map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0e9e6;font-size:14px;"><span style="color:var(--muted);font-size:12px;text-transform:uppercase;">${k}</span><span style="font-weight:600;">${v}</span></div>`).join('')}`;
+  document.getElementById('s-cust-modal').style.display='flex';
+}
+
+function sViewCustomer(name){
+  const sales=getSales().filter(s=>s.customer===name&&s.status==='sold');
+  const total=sales.reduce((s,x)=>s+Number(x.amount),0);
+  document.getElementById('s-cust-modal-body').innerHTML=`
+    ${[['Name',name],['Phone',sales[0]?.phone||'—'],['Purchases',sales.length+' sarees'],['Total Spent',fmtAmt(total)]]
+    .map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0e9e6;font-size:14px;"><span style="color:var(--muted);font-size:12px;text-transform:uppercase;">${k}</span><span style="font-weight:600;">${v}</span></div>`).join('')}
+    <div style="margin-top:12px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Purchase History</div>
+    ${sales.map(s=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0e9e6;font-size:13px;"><span>${fmtDate(s.date)}</span><span>${s.sareeName} — ${fmtAmt(s.amount)}</span></div>`).join('')}`;
+  document.getElementById('s-cust-modal').style.display='flex';
+}
+
+function sDeleteSale(id){
+  if(!confirm('Delete this sale?'))return;
+  saveSales(getSales().filter(s=>s.id!==id));
+  sFiltered=sFiltered.filter(s=>s.id!==id);
+  sRenderSalesTable(); sUpdateStats();
+  showToast('🗑','Sale deleted.');
+}
+
+function sOpenAddSale(){
+  const sarees=getSarees();
+  document.getElementById('sn-saree').innerHTML=sarees.map(s=>`<option value="${s.id}" data-name="${s.name}" data-cat="${s.category}" data-img="${s.image}" data-price="${s.price}">${s.name}</option>`).join('');
+  const now=new Date();
+  document.getElementById('sn-date').value=now.toISOString().split('T')[0];
+  document.getElementById('sn-time').value=now.toTimeString().slice(0,5);
+  document.getElementById('s-add-sale-modal').style.display='flex';
+}
+
+function sSaveSale(e){
+  e.preventDefault();
+  const sel=document.getElementById('sn-saree'), opt=sel.options[sel.selectedIndex];
+  const sales=getSales(), newId=sales.length?Math.max(...sales.map(s=>s.id))+1:1;
+  sales.push({id:newId,sareeId:Number(opt.value),sareeName:opt.dataset.name,category:opt.dataset.cat,image:opt.dataset.img,
+    customer:document.getElementById('sn-name').value.trim(),phone:document.getElementById('sn-phone').value.trim(),
+    amount:Number(document.getElementById('sn-amount').value),date:document.getElementById('sn-date').value,
+    time:document.getElementById('sn-time').value,notes:document.getElementById('sn-notes').value.trim(),status:'sold'});
+  saveSales(sales); sFiltered=[...sales];
+  document.getElementById('s-add-sale-modal').style.display='none';
+  sRenderActive(); sUpdateStats();
+  showToast('✅','Sale recorded!');
+}
+
+function sExportCSV(){
+  const rows=[['Date','Time','Saree','Category','Customer','Phone','Amount','Status']];
+  sFiltered.forEach(s=>rows.push([s.date,s.time,s.sareeName,s.category,s.customer,s.phone||'',s.amount,s.status]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nss_sales.csv';a.click();
+}
+
+function sExportCustomerCSV(){
+  const sales=getSales().filter(s=>s.status==='sold'),map={};
+  sales.forEach(s=>{if(!map[s.customer])map[s.customer]={name:s.customer,phone:s.phone||'',count:0,total:0};map[s.customer].count++;map[s.customer].total+=Number(s.amount);});
+  const rows=[['Customer','Phone','Sarees Bought','Total Spent']];
+  Object.values(map).forEach(c=>rows.push([c.name,c.phone,c.count,c.total]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nss_customers.csv';a.click();
+}
+
+// ---- HERO IMAGE ----
+function switchHeroTab(tab){
+  document.getElementById('hero-tab-url').style.display=tab==='url'?'block':'none';
+  document.getElementById('hero-tab-file').style.display=tab==='file'?'block':'none';
+  document.querySelectorAll('#hero-upload-tabs .upload-tab').forEach((b,i)=>b.classList.toggle('active',(tab==='url'&&i===0)||(tab==='file'&&i===1)));
+}
+function previewHero(url){
+  const img=document.getElementById('hero-preview');
+  img.src=url; img.style.display=url?'block':'none';
+  window._heroFileData=null;
+}
+function handleHeroUpload(input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    window._heroFileData=e.target.result;
+    const img=document.getElementById('hero-preview');
+    img.src=e.target.result; img.style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+function saveHeroImage(){
+  const val=window._heroFileData||document.getElementById('hero-url-input').value.trim();
+  if(!val){showToast('⚠️','Please provide an image URL or upload a file.');return;}
+  localStorage.setItem('nss_hero_image',val);
+  showToast('✅','Hero image saved! It will show on the home page.');
+}
+// Load existing hero image into preview on page load
+(function(){
+  const h=localStorage.getItem('nss_hero_image');
+  if(h&&!h.startsWith('data:')){
+    document.getElementById('hero-url-input').value=h;
+    const img=document.getElementById('hero-preview');
+    img.src=h; img.style.display='block';
+  } else if(h){
+    window._heroFileData=h;
+    const img=document.getElementById('hero-preview');
+    img.src=h; img.style.display='block';
+    switchHeroTab('file');
+  }
+})();
+function showAdminTab(tab){
+  document.getElementById('section-inventory').style.display = tab==='inventory' ? 'block' : 'none';
+  document.getElementById('section-sales').style.display = tab==='sales' ? 'block' : 'none';
+  document.getElementById('tab-inventory').style.borderBottom = tab==='inventory' ? '3px solid var(--wine)' : '3px solid transparent';
+  document.getElementById('tab-inventory').style.color = tab==='inventory' ? 'var(--wine)' : 'var(--muted)';
+  document.getElementById('tab-sales').style.borderBottom = tab==='sales' ? '3px solid var(--wine)' : '3px solid transparent';
+  document.getElementById('tab-sales').style.color = tab==='sales' ? 'var(--wine)' : 'var(--muted)';
+  if(tab==='sales'){ sInit(); }
+}
+
+// ── PREMIUM DIRECTION-AWARE SCROLL REVEAL ──
+let _lastY=window.scrollY;
+function initSR(){
+  const els=document.querySelectorAll("[data-sr]");
+  const obs=new IntersectionObserver(entries=>{
+    const dir=window.scrollY>=_lastY?"down":"up";
+    _lastY=window.scrollY;
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        en.target.classList.remove("sr-out-left","sr-out-right");
+        en.target.classList.add("sr-in");
+      } else if(en.target.classList.contains("sr-in")){
+        const sr=en.target.getAttribute("data-sr");
+        const out=(sr==="right"||(sr==="up"&&dir==="up"))?"sr-out-right":"sr-out-left";
+        en.target.classList.remove("sr-in");
+        en.target.classList.add(out);
+      }
+    });
+  },{threshold:0.1,rootMargin:"0px 0px -40px 0px"});
+  els.forEach(el=>obs.observe(el));
+}
 
 document.getElementById("year").textContent=new Date().getFullYear();
 populateCategorySelect("s-category");
 buildColorGrid("color-grid",[]);
 renderCollection();
-window.addEventListener("load",()=>{const pt=document.getElementById("pt");pt.style.transform="translateY(100%)";setTimeout(()=>pt.style.display="none",600);});
+initSR();
+window.addEventListener("load",()=>{const pt=document.getElementById("pt");pt.style.animation="diagOut .5s cubic-bezier(.77,0,.18,1) forwards";setTimeout(()=>pt.style.display="none",550);});
 document.getElementById("modal").addEventListener("click",e=>{if(e.target===document.getElementById("modal"))closeModal();});
+document.getElementById("s-cust-modal").addEventListener("click",e=>{if(e.target===document.getElementById("s-cust-modal"))document.getElementById("s-cust-modal").style.display="none";});
+document.getElementById("s-add-sale-modal").addEventListener("click",e=>{if(e.target===document.getElementById("s-add-sale-modal"))document.getElementById("s-add-sale-modal").style.display="none";});
+showAdminTab('inventory');
 </script>
 </body>
 </html>

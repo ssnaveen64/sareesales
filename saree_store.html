@@ -10,9 +10,9 @@
 body{font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:#fff;overflow-x:hidden;}
 a{color:inherit;text-decoration:none;}
 
-/* PAGE TRANSITION */
-.page-transition{position:fixed;inset:0;background:var(--wine-dark);z-index:9999;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
-.page-transition.active{transform:translateY(0);}
+/* PAGE TRANSITION — curtain wipe left→right (gold) */
+.page-transition{position:fixed;inset:0;background:linear-gradient(135deg,var(--wine-dark) 60%,var(--gold));z-index:9999;transform:translateX(-100%);transition:transform .5s cubic-bezier(.77,0,.18,1);}
+.page-transition.active{transform:translateX(0);}
 
 /* EXPLOSION ENTRY ANIMATIONS */
 @keyframes fromTop{from{opacity:0;transform:translateY(-100px) scale(.85)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -45,6 +45,10 @@ nav a:hover{color:var(--wine);}
 .cart-btn::before{content:'';position:absolute;inset:0;background:var(--wine);transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:-1;}
 .cart-btn:hover{color:#fff;}
 .cart-btn:hover::before{transform:scaleX(1);}
+
+/* BACK BUTTON */
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;padding:7px 14px;border:1.5px solid #e7d8dc;border-radius:20px;transition:all .25s;white-space:nowrap;cursor:pointer;}
+.back-btn:hover{color:var(--wine);border-color:var(--wine);background:var(--cream);}
 
 /* HERO */
 .hero{min-height:420px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;background:var(--cream);overflow:hidden;}
@@ -88,28 +92,33 @@ h2{font:36px Georgia,serif;margin:0 0 8px;color:var(--wine-dark);}
 .color-dot[title]::after{content:attr(title);position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:10px;padding:3px 7px;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;}
 .color-dot:hover::after{opacity:1;}
 
-/* PRODUCTS */
-.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;}
-.product{border:1px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;opacity:0;transform:translateY(40px);}
-.product.visible{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease,box-shadow .3s;}
-.product:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 16px 40px #4c102720;}
+/* PRODUCTS — compact commercial card */
+.products{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;}
+.product{border:1px solid #eee5e8;border-radius:12px;overflow:hidden;background:#fff;transition:transform .3s,box-shadow .3s;will-change:transform,opacity;cursor:pointer;}
+.product[data-sr]{transition:transform .75s cubic-bezier(.16,1,.3,1),opacity .75s cubic-bezier(.16,1,.3,1),box-shadow .3s;transition-delay:var(--sr-delay,0s);}
+.product[data-sr="left"]{opacity:0;transform:translateX(-72px) scale(.97);}
+.product[data-sr="right"]{opacity:0;transform:translateX(72px) scale(.97);}
+.product[data-sr].sr-in{opacity:1;transform:none;}
+.product[data-sr].sr-out-left{opacity:0;transform:translateX(-60px) scale(.96);transition-duration:.45s;}
+.product[data-sr].sr-out-right{opacity:0;transform:translateX(60px) scale(.96);transition-duration:.45s;}
+.product:hover{transform:translateY(-5px) scale(1.01)!important;box-shadow:0 14px 36px #4c102722;}
 .product-img-wrap{position:relative;overflow:hidden;}
-.product img{width:100%;height:260px;object-fit:cover;display:block;background:#f6eeee;transition:transform .5s;}
-.product:hover img{transform:scale(1.07);}
-.product-badge{position:absolute;top:12px;left:12px;background:var(--wine);color:#fff;font-size:10px;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;}
-.wishlist-btn{position:absolute;top:10px;right:10px;background:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0002;transition:all .25s;opacity:0;}
+.product img{width:100%;height:200px;object-fit:cover;display:block;background:#f6eeee;transition:transform .5s;}
+.product:hover img{transform:scale(1.06);}
+.product-badge{position:absolute;top:10px;left:10px;background:var(--wine);color:#fff;font-size:10px;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;}
+.wishlist-btn{position:absolute;top:8px;right:8px;background:#fff;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px #0002;transition:all .25s;opacity:0;}
 .product:hover .wishlist-btn{opacity:1;}
 .wishlist-btn:hover{background:var(--wine);color:#fff;}
-.product-info{padding:16px;}
-.tag{color:var(--wine);font-size:11px;text-transform:uppercase;letter-spacing:1px;}
-.product h3{font-size:15px;margin:7px 0 4px;font-weight:600;}
-.product-colors{display:flex;gap:5px;margin:8px 0;flex-wrap:wrap;}
-.swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;display:inline-block;}
+.product-info{padding:12px 14px 14px;}
+.tag{color:var(--wine);font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.product h3{font-size:13px;margin:5px 0 3px;font-weight:600;line-height:1.4;color:var(--ink);}
+.product-colors{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap;}
+.swatch{width:14px;height:14px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;display:inline-block;}
 .swatch:hover,.swatch.active-swatch{border-color:var(--wine-dark);transform:scale(1.2);}
-.price{font-weight:bold;color:var(--wine-dark);font-size:16px;}
-.old-price{color:#9a8c91;text-decoration:line-through;font-weight:normal;font-size:13px;margin-left:6px;}
-.discount-pct{background:#e8f5e9;color:#2e7d32;font-size:11px;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:bold;}
-.product .btn{width:100%;margin-top:12px;padding:11px;font-size:14px;border-radius:6px;}
+.price{font-weight:700;color:var(--wine-dark);font-size:15px;}
+.old-price{color:#9a8c91;text-decoration:line-through;font-weight:normal;font-size:12px;margin-left:5px;}
+.discount-pct{background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 5px;border-radius:4px;margin-left:5px;font-weight:bold;}
+.product .btn{width:100%;margin-top:10px;padding:9px;font-size:13px;border-radius:6px;}
 
 /* NEWSLETTER */
 .newsletter{margin:0 6% 60px;padding:50px 20px;text-align:center;background:linear-gradient(135deg,var(--cream),#fce8f0);border-radius:16px;position:relative;overflow:hidden;}
@@ -132,13 +141,18 @@ footer p{color:#e1cbd3;line-height:1.8;}
 .toast.show{display:flex;align-items:center;gap:10px;}
 @keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-/* SCROLL REVEAL */
-.reveal{opacity:0;transform:translateY(50px);transition:opacity .7s ease,transform .7s ease;}
-.reveal.visible{opacity:1;transform:translateY(0);}
-.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity .7s ease,transform .7s ease;}
-.reveal-left.visible{opacity:1;transform:translateX(0);}
-.reveal-right{opacity:0;transform:translateX(50px);transition:opacity .7s ease,transform .7s ease;}
-.reveal-right.visible{opacity:1;transform:translateX(0);}
+/* ── PREMIUM SCROLL REVEAL ── */
+[data-sr]{will-change:transform,opacity;transition:transform .75s cubic-bezier(.16,1,.3,1),opacity .75s cubic-bezier(.16,1,.3,1);transition-delay:var(--sr-delay,0s);}
+[data-sr="left"]{opacity:0;transform:translateX(-72px) scale(.97);}
+[data-sr="right"]{opacity:0;transform:translateX(72px) scale(.97);}
+[data-sr="up"]{opacity:0;transform:translateY(56px) scale(.97);}
+[data-sr="scale"]{opacity:0;transform:scale(.88);}
+[data-sr].sr-in{opacity:1;transform:none;}
+[data-sr].sr-out-left{opacity:0;transform:translateX(-60px) scale(.96);transition-duration:.45s;}
+[data-sr].sr-out-right{opacity:0;transform:translateX(60px) scale(.96);transition-duration:.45s;}
+/* legacy classes kept for compat */
+.reveal,.reveal-left,.reveal-right{}
+.reveal.visible,.reveal-left.visible,.reveal-right.visible{}
 
 /* FLOATING PETALS */
 .petal{position:fixed;pointer-events:none;font-size:18px;animation:fall linear infinite;opacity:.6;z-index:1;}
@@ -178,7 +192,6 @@ footer p{color:#e1cbd3;line-height:1.8;}
     <a href="#shop" onclick="setCategory('Cotton')">Cotton</a>
     <a href="#shop" onclick="setCategory('Bridal')">Bridal</a>
     <a href="add_saree.html" onclick="navigate(event,'add_saree.html')">Admin</a>
-    <a href="sales.html" onclick="navigate(event,'sales.html')">Sales</a>
     <a href="#contact">Contact</a>
   </nav>
   <a class="cart-btn" href="cart.html" onclick="navigate(event,'cart.html')">🛒 Cart (<span id="cart-count">0</span>)</a>
@@ -192,20 +205,20 @@ footer p{color:#e1cbd3;line-height:1.8;}
       <p class="from-left" style="animation-delay:.3s">Explore timeless weaves, graceful prints, and beautiful colours — curated for your everyday moments and grand celebrations.</p>
       <a class="btn from-bottom" style="animation-delay:.4s" href="#shop">Explore Collection ↓</a>
     </div>
-    <div class="hero-image from-right" style="animation-delay:.15s" role="img" aria-label="Traditional Indian saree collection"></div>
+    <div class="hero-image from-right" style="animation-delay:.15s" role="img" aria-label="Traditional Indian saree collection" id="hero-image"></div>
   </section>
 
-  <section class="benefits reveal">
-    <div class="benefit-item from-left" style="animation-delay:.1s"><span class="benefit-icon">🌟</span><strong>Premium Quality</strong><span>Handpicked weaves for every occasion</span></div>
-    <div class="benefit-item pop-in" style="animation-delay:.2s"><span class="benefit-icon">🔒</span><strong>Secure Shopping</strong><span>Safe & simple checkout experience</span></div>
-    <div class="benefit-item from-right" style="animation-delay:.3s"><span class="benefit-icon">💬</span><strong>Customer Support</strong><span>Always here to help you</span></div>
+  <section class="benefits">
+    <div class="benefit-item" data-sr="left" style="--sr-delay:.05s"><span class="benefit-icon">🌟</span><strong>Premium Quality</strong><span>Handpicked weaves for every occasion</span></div>
+    <div class="benefit-item" data-sr="up" style="--sr-delay:.15s"><span class="benefit-icon">🔒</span><strong>Secure Shopping</strong><span>Safe & simple checkout experience</span></div>
+    <div class="benefit-item" data-sr="right" style="--sr-delay:.25s"><span class="benefit-icon">💬</span><strong>Customer Support</strong><span>Always here to help you</span></div>
   </section>
 
   <section class="section" id="shop">
-    <div class="section-heading reveal">
+    <div class="section-heading" data-sr="left">
       <div><h2>Shop Our Sarees</h2><p>Find your next favourite drape.</p></div>
     </div>
-    <div class="filters reveal" id="cat-filters">
+    <div class="filters" data-sr="up" style="--sr-delay:.08s" id="cat-filters">
       <button class="filter active" onclick="setCategory('All')">All Sarees</button>
       <button class="filter" onclick="setCategory('Silk')">Silk</button>
       <button class="filter" onclick="setCategory('Cotton')">Cotton</button>
@@ -213,13 +226,13 @@ footer p{color:#e1cbd3;line-height:1.8;}
       <button class="filter" onclick="setCategory('Bridal')">Bridal</button>
       <button class="filter" onclick="setCategory('Casual')">Casual</button>
     </div>
-    <div class="color-filters reveal" id="color-filters">
+    <div class="color-filters" data-sr="up" style="--sr-delay:.14s" id="color-filters">
       <span>Filter by colour:</span>
     </div>
     <div class="products" id="products"></div>
   </section>
 
-  <section class="newsletter reveal" id="contact">
+  <section class="newsletter" data-sr="scale" id="contact">
     <h2>Stay in the loop 💌</h2>
     <p>Sign up to hear about new arrivals and exclusive collections.</p>
     <div class="newsletter-form">
@@ -230,10 +243,10 @@ footer p{color:#e1cbd3;line-height:1.8;}
 </main>
 
 <footer>
-  <div class="reveal-left"><strong>NSS Textile</strong><p>Beautiful sarees for every occasion.<br/>Tradition meets elegance.</p></div>
-  <div class="reveal"><strong>Customer Care</strong><p>Email: hello@nsstextile.example<br/>Phone: +91 00000 00000</p></div>
-  <div class="reveal"><strong>Quick Links</strong><p><a href="#shop">Shop Sarees</a><br/><a href="cart.html">View Cart</a><br/><a href="#contact">Contact</a></p></div>
-  <div class="reveal-right"><strong>Information</strong><p>Shipping · Returns<br/>Privacy Policy</p></div>
+  <div data-sr="left" style="--sr-delay:.0s"><strong>NSS Textile</strong><p>Beautiful sarees for every occasion.<br/>Tradition meets elegance.</p></div>
+  <div data-sr="up" style="--sr-delay:.1s"><strong>Customer Care</strong><p>Email: hello@nsstextile.example<br/>Phone: +91 00000 00000</p></div>
+  <div data-sr="up" style="--sr-delay:.18s"><strong>Quick Links</strong><p><a href="#shop">Shop Sarees</a><br/><a href="cart.html">View Cart</a><br/><a href="#contact">Contact</a></p></div>
+  <div data-sr="right" style="--sr-delay:.0s"><strong>Information</strong><p>Shipping · Returns<br/>Privacy Policy</p></div>
 </footer>
 <div class="footer-bottom">© <span id="year"></span> NSS Textile. All rights reserved.</div>
 
@@ -360,25 +373,38 @@ function subscribe(){
 
 function navigate(e,url){ e.preventDefault(); const pt=document.getElementById("pt"); pt.classList.add("active"); setTimeout(()=>window.location.href=url,450); }
 
-// Scroll reveal
+// ── PREMIUM DIRECTION-AWARE SCROLL REVEAL ──
 function observeProducts(){
   document.querySelectorAll(".product").forEach((el,i)=>{
-    el.style.transitionDelay=(i%4)*0.08+"s";
-    const obs=new IntersectionObserver(entries=>{
-      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("visible"); obs.unobserve(en.target); }});
-    },{threshold:0.1});
-    obs.observe(el);
+    const side = i%2===0 ? "left" : "right";
+    el.setAttribute("data-sr", side);
+    el.style.setProperty("--sr-delay", (i%4)*0.09+"s");
   });
+  initSR();
 }
 
-function initReveal(){
-  document.querySelectorAll(".reveal,.reveal-left,.reveal-right").forEach(el=>{
-    const obs=new IntersectionObserver(entries=>{
-      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("visible"); obs.unobserve(en.target); }});
-    },{threshold:0.12});
-    obs.observe(el);
-  });
+let _lastY = window.scrollY;
+function initSR(){
+  const els = document.querySelectorAll("[data-sr]");
+  const obs = new IntersectionObserver((entries)=>{
+    const dir = window.scrollY >= _lastY ? "down" : "up";
+    _lastY = window.scrollY;
+    entries.forEach(en=>{
+      if(en.isIntersecting){
+        en.target.classList.remove("sr-out-left","sr-out-right");
+        en.target.classList.add("sr-in");
+      } else if(en.target.classList.contains("sr-in")){
+        const sr = en.target.getAttribute("data-sr");
+        const exitClass = (sr==="right"||(sr==="up"&&dir==="up")) ? "sr-out-right" : "sr-out-left";
+        en.target.classList.remove("sr-in");
+        en.target.classList.add(exitClass);
+      }
+    });
+  },{threshold:0.12,rootMargin:"0px 0px -40px 0px"});
+  els.forEach(el=>obs.observe(el));
 }
+
+function initReveal(){ initSR(); }
 
 // Sticky header shadow
 window.addEventListener("scroll",()=>{
@@ -406,9 +432,16 @@ buildColorFilters();
 renderProducts();
 initReveal();
 spawnPetals();
+// Load hero image from admin setting
+(function(){
+  const heroImg=localStorage.getItem('nss_hero_image');
+  if(heroImg){
+    document.getElementById('hero-image').style.backgroundImage=`linear-gradient(0deg,rgba(50,10,25,.15),rgba(50,10,25,.02)),url('${heroImg}')`;
+  }
+})();
 
 // Page entry animation
-window.addEventListener("load",()=>{ const pt=document.getElementById("pt"); pt.style.transform="translateY(100%)"; setTimeout(()=>pt.style.display="none",600); });
+window.addEventListener("load",()=>{ const pt=document.getElementById("pt"); pt.style.transition="transform .5s cubic-bezier(.77,0,.18,1)"; pt.style.transform="translateX(100%)"; setTimeout(()=>pt.style.display="none",600); });
 </script>
 </body>
 </html>
